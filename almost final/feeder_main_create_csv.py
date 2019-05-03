@@ -2,11 +2,13 @@ import serial
 import time
 import numpy as np
 import pandas as pd
+import csv
 from stereo import *  # playing files import
 
 pump = serial.Serial('COM5', 9600, timeout=1) # pump
 ir = serial.Serial('COM15', 9600, timeout=1)# IR
-time.sleep(2)
+# time.sleep(2)
+df_signal = pd.DataFrame(columns=['signal'])
 
 class Feeder:
 
@@ -16,7 +18,10 @@ class Feeder:
 
     def signal_on (self, intervals = 10):
         """ intervals = 20 sec between signals"""
+        global df_signal
         signals = stereo('left_sig.wav', 'right_sig.wav')
+        print (f"{pd.Timestamp.now()} playing signal")
+        df_signal.loc[f'{pd.Timestamp.now()}'] = 'play'
         signals.run() # play signals from both feeders
         time.sleep(intervals) 
 
@@ -63,6 +68,9 @@ class Feeder:
             except serial.SerialException as e2:
                 print("I couldnt open the port jesus!!!")
         time.sleep(2)
+
+    def write_to_csv (self, df_data):
+       df_data.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d-%H%m')}.csv")
 
 
     def run (self):  
