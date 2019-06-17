@@ -7,10 +7,6 @@ from stereo import *  # playing files import
 
 pump = serial.Serial('COM5', 9600, timeout=1) # pump
 ir = serial.Serial('COM15', 9600, timeout=1)# IR
-# time.sleep(2)
-df_signal = pd.DataFrame(columns=['signal'])
-df_ir = pd.DataFrame(columns=['feeder'])
-df_pump = pd.DataFrame(columns=['pump'])
 
 class Feeder:
 
@@ -18,14 +14,24 @@ class Feeder:
     #     self.pump = serial.Serial('COM5', 9600, timeout=30)  # pump
     #     self.ir = serial.Serial('COM15', 9600, timeout=30)  # IR
 
+    def __init__(self):
+        self.df_signal = pd.DataFrame(columns=['signal'])
+        self.df_ir = pd.DataFrame(columns=['feeder'])
+        self.df_pump = pd.DataFrame(columns=['pump'])
+        self.df_all = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+
+
     def signal_on (self, intervals = 10):
         """ intervals = 20 sec between signals"""
-        global df_signal
         signals = stereo('left_sig.wav', 'right_sig.wav')
         print (f"{pd.Timestamp.now()} playing signal")
-        df_signal.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'play'
+        self.df_signal.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'play'
+        # self.write_to_csv() # not working
+        df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+        df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+        # print (df)
         signals.run() # play signals from both feeders
-        time.sleep(intervals) 
+        time.sleep(intervals)
 
 
     def read_ir (self):
@@ -47,8 +53,6 @@ class Feeder:
                     print("I couldnt open the port jesus!!!")
 
         print(msg) #print to screen
-        df_ir.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = msg
-        # df_ir.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'] = msg #needs to be check
         time.sleep(1)
         return msg
 
@@ -62,10 +66,14 @@ class Feeder:
             val = np.random.choice(2, 1, p=[0.6, 0.4])
             if(val == 0):
                 pump.write([pump_id])
-                df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = pump_id
-                # df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'] = [pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),pump_id] #needs to be check
+                self.df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = pump_id
+                df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             else:
-                df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'no'
+                self.df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'no {}'.format(pump_id)
+                df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+
         except serial.SerialException as e:
             try:
                 if(pump.isOpen()):
@@ -79,42 +87,67 @@ class Feeder:
                 print("I couldnt open the port jesus!!!")
         time.sleep(2)
 
-    def write_to_csv (self, df_signal, df_ir, df_pump):
-        df_data = pd.concat([df_signal, df_ir, df_pump], axis=1)
-        df_data.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d-%H%m')}.csv")
+
+
+    def write_to_csv(self): # not useful
+        self.df_all = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+        df_all = self.df_all
+        # df_data.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d-%H%M')}.csv")
+        df_all.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+        # return df_data
 
 
     def run (self):  
         global ir
         global pump
-        # while True:
+
         r_msg = self.read_ir()
         print (r_msg)
         if (r_msg == b'1') or (r_msg == b'2'):  # reads
             bat = True
-        else: # doesn't read
+            self.df_ir.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = r_msg
+            df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+            df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+
+        else: # if doesn't read
             bat = False
         while bat == False:
-            self.signal_on()
+            df_signal2 = self.signal_on()
+
             r_msg = self.read_ir()
             print(r_msg)
             if r_msg == b'1':
                 self.pump_it(2)
                 bat = True
+                self.df_ir.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = r_msg
+                df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+
             elif r_msg == b'2':
                 self.pump_it(1)
                 bat = True
+                self.df_ir.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = r_msg
+                df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
 
 
 
 if __name__ == "__main__":
     feeder = Feeder()
+    # try:
     while True:
         feeder.run()
-        # feeder.signal_on()
+        # f = feeder.signal_on()
+        # print (f)
         # feeder.pump_it(1)
         # read = feeder.read_ir()
         # print (read)
+
+
+
+
+
+
 
      
 
