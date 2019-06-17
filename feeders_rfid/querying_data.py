@@ -56,3 +56,6 @@ def bat_antenna():
 #     finally:
 #         if conn is not None:
 #             conn.close()
+
+if __name__ == "__main__":
+    bat_antenna ()
