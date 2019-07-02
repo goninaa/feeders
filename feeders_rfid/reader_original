@@ -1,0 +1,2 @@
+# Run reader
+   	sudo ./MonsoonReader --serial_host 192.168.0.204 --serial_port 10002 --power 190 --read_time_ms 1000 --sleep 0 --cmux --mxa 2 --console --csv bat_eat_data/test_$filename.csv
