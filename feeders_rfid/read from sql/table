@@ -1,0 +1,12 @@
+CREATE TABLE bats_feeders (
+    A int, 
+    B int,
+    Tag varchar (26),
+    D int,
+    db int,
+    F int,
+	time timestamp PRIMARY KEY,
+    H int,
+    Antenna int,
+    J int,
+	);
