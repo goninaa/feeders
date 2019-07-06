@@ -21,7 +21,7 @@ class Feeder:
         # self.msg = "first msg"
         self.bat = False
         self.fname = fname
-        self.bat_loc = "no_bat"
+        self.bat_loc = None
 
 
     def signal_on (self, intervals = 20):
@@ -78,6 +78,8 @@ class Feeder:
             try:
                 if(pump.isOpen()):
                     pump.close()
+                if (ir.isOpen()):
+                    ir.close()
                 pump = serial.Serial(com_pump, 9600, timeout=1)  # pump
                 time.sleep(3)
                 print("restart")
@@ -95,10 +97,25 @@ class Feeder:
             t_end = time.time()+search_t
             while time.time() < t_end:
                 self.read_rfid()
-                if (self.bat_loc == "b'101'") or (self.bat_loc == "b'102'"):
-                    break
+            if (self.bat_loc == "b'101'") or (self.bat_loc == "b'102'"):
+                break
             if self.bat_loc == "no_bat" and time.time() > t_end:
                 self.bat = False
+            
+
+
+            self.bat = False
+
+    def no_bat(self):
+        search_t = 10 #search time
+        t_end = time.time()+search_t
+        while time.time() < t_end:
+            self.read_rfid()
+                if self.bat == True:
+                    self.which_pump()
+                    flag_t += 1
+            if self.bat == True:
+                break
 
     def which_pump (self):
         """decide which pump to use"""
@@ -149,7 +166,6 @@ class Feeder:
         """main"""
         while True:
             self.read_rfid()
-            time.sleep(1)
             self.signal_on()
 
     def find_bat (self):
@@ -167,12 +183,7 @@ if __name__ == "__main__":
 
 
     while True:
-        try:
-            feeder.run()
-            time.sleep(1)
-        except:
-            feeder.run()
-            time.sleep(1)
+        feeder.run()
         # f = feeder.signal_on()
         # print (f)
         #  feeder.pump_it(1)

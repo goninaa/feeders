@@ -4,15 +4,15 @@ import datetime
 class DATA:
 
     def __init__ (self,fname):
-        self.fname = fname    
+        self.fname = fname
         self.df = pd.read_csv(self.fname).tail(n = 50)
         self.df_last = None
         self.activity = False
-        self.bat = "no_bat"
+        self.bat = None
 
     def time_index(self):
         """ add headers and convert time to datetimeIndex"""
-        self.df.columns = ["0", "A", "B", "TAG", "D", "db", "F", "time", "H", "ANTENNA", "J"]
+        self.df.columns = ["A", "B", "TAG", "D", "db", "F", "time", "H", "ANTENNA", "J"]
         self.df['TIME'] = pd.to_datetime(self.df['time'])
         self.df = self.df.set_index(['TIME'])
         self.df.pop('time')
@@ -20,12 +20,11 @@ class DATA:
     def check_activity (self):
         """ detrmine if there been activity in the last second"""
         # ten_sec_ago = (datetime.datetime.now()- datetime.timedelta(seconds=10))
-        th_seconds = 3
-        second_ago = (datetime.datetime.utcnow()- datetime.timedelta(seconds=th_seconds))
+        second_ago = (datetime.datetime.now()- datetime.timedelta(seconds=1))
         self.df = self.df.last('1s')
         row_time = self.df.index.unique()
-        print (row_time[0])
-        if row_time[0] >= second_ago:
+        # print (row_time)
+        if row_time >= second_ago:
             self.activity = True
         else :
             self.activity = False
@@ -39,7 +38,7 @@ class DATA:
         if antenna_count[ant] >= th:
             self.bat = f"b'{ant}'"
         else:
-            self.bat = "no_bat"
+            self.bat = False
 
         # for future use:
         # antennas = self.df.ANTENNA.unique()
@@ -62,14 +61,12 @@ class DATA:
         self.check_activity()
         if self.activity == True:
             self.find_bat()
-        else:
-            self.bat = 'no_bat'
         # self.save_bat()
         # self.write_over()
 
 
 if __name__ == "__main__":
-    fname = 'test_06-07-2019.csv'
+    fname = 'test_new_02-12-18.csv'
     data = DATA(fname)
     data.run()
     print (data.bat)

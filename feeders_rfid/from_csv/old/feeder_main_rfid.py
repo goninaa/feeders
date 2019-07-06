@@ -2,13 +2,10 @@ import serial
 import time
 import numpy as np
 import pandas as pd
-from datetime import date
 import csv
 from stereo import *  # playing files import
-from class_read import *
+from class_read2.1 import *
 
-com_pump = 'COM1'
-pump = serial.Serial(com_pump, 9600, timeout=1) # pump
 
 class Feeder:
 
@@ -19,14 +16,14 @@ class Feeder:
         self.disconnect = []
         self.df_all = pd.concat([self.df_signal, self.df_feeder, self.df_pump], axis=1, sort = True)
         # self.msg = "first msg"
-        self.bat = False
+        # self.bat = False
         self.fname = fname
-        self.bat_loc = "no_bat"
+        self.bat_loc = False
 
 
     def signal_on (self, intervals = 20):
         """ intervals = 20 sec between signals"""
-        while self.bat == False:
+        while self.bat_loc == False:
             signals = stereo('left_sig.wav', 'right_sig.wav')
             print (f"{pd.Timestamp.now()} playing signal")
             self.df_signal.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'play'
@@ -38,11 +35,11 @@ class Feeder:
             t_end = time.time()+intervals
             while time.time() < t_end:
                 self.read_rfid()
-                self.decide()
-                if self.bat == True and flag_t == 0:
+                # self.decide()
+                if self.bat_loc != False and flag_t == 0:
                     self.which_pump()
                     flag_t += 1
-            if self.bat == True:
+            if self.bat_loc != False:
                 break
 
     def read_rfid (self):
@@ -54,7 +51,7 @@ class Feeder:
             df = pd.concat([self.df_signal, self.df_feeder, self.df_pump], axis=1, sort = True)
             df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             print(self.bat_loc) 
-            self.decide()
+            # self.decide()
 
 
     def pump_it (self, pump_id):
@@ -78,6 +75,8 @@ class Feeder:
             try:
                 if(pump.isOpen()):
                     pump.close()
+                if (ir.isOpen()):
+                    ir.close()
                 pump = serial.Serial(com_pump, 9600, timeout=1)  # pump
                 time.sleep(3)
                 print("restart")
@@ -86,29 +85,23 @@ class Feeder:
                 print("I couldnt open the port jesus!!!")
 
 
-    def decide (self):
-        """check if bat true or false"""
-        if (self.bat_loc == "b'101'") or (self.bat_loc == "b'102'"):  # reads bats
-            self.bat = True
-        elif self.bat_loc == "no_bat": # if reads "no bat"
-            search_t = 10 #search time
-            t_end = time.time()+search_t
-            while time.time() < t_end:
-                self.read_rfid()
-                if (self.bat_loc == "b'101'") or (self.bat_loc == "b'102'"):
-                    break
-            if self.bat_loc == "no_bat" and time.time() > t_end:
-                self.bat = False
+    # def decide (self):
+    #     """check if bat true or false"""
+    #     if (self.bat_loc == b'101') or (self.bat_loc == b'102'):  # reads bats
+    #         self.bat = True
+    #     # else:  # if doesn't read
+    #     elif self.bat_loc == False: # if reads "no bat"
+    #         self.bat = False
 
     def which_pump (self):
         """decide which pump to use"""
-        if self.bat_loc == "b'101'":
+        if self.bat_loc == b'101':
             self.pump_it(1)
             # self.pump_it(1)
             # self.pump_it(1)
             # self.pump_it(1)
             # self.pump_it(1)
-        elif self.bat_loc == "b'102'":
+        elif self.bat_loc == b'102':
             self.pump_it(2)
             # self.pump_it(2)
             # self.pump_it(2)
@@ -148,8 +141,7 @@ class Feeder:
     def run (self):
         """main"""
         while True:
-            self.read_rfid()
-            time.sleep(1)
+            self.read_ir()
             self.signal_on()
 
     def find_bat (self):
@@ -159,27 +151,21 @@ class Feeder:
 
 
 if __name__ == "__main__":
-    filename = date.today().strftime("%d-%m-%Y")
-    fname = f"test_{filename}.csv"   #date of today
+    fname = ''  #date of today?
 
-    feeder = Feeder(fname)
+    feeder = Feeder()
     
 
 
     while True:
-        try:
-            feeder.run()
-            time.sleep(1)
-        except:
-            feeder.run()
-            time.sleep(1)
+        # feeder.run()
         # f = feeder.signal_on()
         # print (f)
         #  feeder.pump_it(1)
-        #time.sleep(4)
-        #feeder.pump_it(1) #left
-        #time.sleep(4)
-        #feeder.pump_it(2)  # right
+        time.sleep(4)
+        feeder.pump_it(1) #left
+        time.sleep(4)
+        feeder.pump_it(2)  # right
       #
         # read = feeder.read_ir()
         # print (read)
