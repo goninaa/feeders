@@ -21,7 +21,7 @@ class Feeder:
         self.bat = False
 
 
-    def signal_on (self, intervals = 20):
+    def signal_on_r_reward (self, intervals = 20):
         """ intervals = 20 sec between signals"""
         while self.bat == False:
             signals = stereo('left_sig.wav', 'right_sig.wav')
@@ -37,13 +37,35 @@ class Feeder:
                 self.read_ir()
                 self.decide()
                 if self.bat == True and flag_t == 0:
-                    self.which_pump()
+                    self.which_pump_r_reward()
+                    flag_t += 1
+            if self.bat == True:
+                break
+
+        def signal_on_l_reward (self, intervals = 20):
+        """ intervals = 20 sec between signals"""
+        while self.bat == False:
+            signals = stereo('left_sig.wav', 'right_sig.wav')
+            print (f"{pd.Timestamp.now()} playing signal")
+            self.df_signal.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'play'
+            df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+            df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+            # print (df)
+            signals.run()  # play signals from both feeders
+            flag_t = 0
+            t_end = time.time()+intervals
+            while time.time() < t_end:
+                self.read_ir()
+                self.decide()
+                if self.bat == True and flag_t == 0:
+                    self.which_pump_l_reward()
                     flag_t += 1
             if self.bat == True:
                 break
 
 
     def read_ir (self):
+        """read from ir reader, print the result and save to data frame in csv"""
         global ir
         global pump
         global df_ir
@@ -71,15 +93,8 @@ class Feeder:
         self.decide()
 
 
-    # def bat_to_false (self):
-    #     if self.bat == True:
-    #         self.bat == False
-    #
-    # def bat_to_true (self):
-    #     if self.bat == False:
-    #         self.bat == True
-
     def pump_it (self, pump_id):
+        """pump from selected pump"""
         global ir
         global pump
 
@@ -113,6 +128,7 @@ class Feeder:
                 print("I couldnt open the port jesus!!!")
 
     def pump_it_80 (self, pump_id):
+        """pump from selected pump with the probability of 0.8"""
         global ir
         global pump
 
@@ -147,6 +163,7 @@ class Feeder:
                 print("I couldnt open the port jesus!!!")
 
     def pump_it_20 (self, pump_id):
+         """pump from selected pump with the probability of 0.2"""
         global ir
         global pump
 
@@ -188,20 +205,24 @@ class Feeder:
         elif self.msg == b'': # if reads "no bat"
             self.bat = False
 
-    def which_pump (self):
-        """decide which pump to use"""
+    def which_pump_r_reward (self):
+        """decide which pump to use. 
+            right feeder with probability of 0.8
+            left feeder probability 0.2"""
         if self.msg == b'1':
             self.pump_it_20(1)
-            # self.pump_it(1)
-            # self.pump_it(1)
-            # self.pump_it(1)
-            # self.pump_it(1)
         elif self.msg == b'2':
             self.pump_it_80(2)
-            # self.pump_it(2)
-            # self.pump_it(2)
-            # self.pump_it(2)
-            # self.pump_it(2)
+
+    def which_pump_l_reward (self):
+         """decide which pump to use. 
+            right feeder with probability of 0.2
+            left feeder probability 0.8"""
+        if self.msg == b'1':
+            self.pump_it_80(1)
+        elif self.msg == b'2':
+            self.pump_it_20(2)
+          
 
     def dis_time (self):
         """ return current time to self.disconnect"""
@@ -233,11 +254,47 @@ class Feeder:
         self.pump_it(2)
         self.pump_it(2)
 
-    def run (self):
-        """main"""
-        while True:
+
+    def r_reward(self, running_time = 60):
+        """ running r_reward condition for n running time (in sec)"""
+        t_end = time.time()+ running_time
+        while time.time() < t_end:
+            if time.time() >= t_end:
+                break
             self.read_ir()
-            self.signal_on()
+            self.signal_on_r_reward()
+
+     def l_reward(self, running_time = 60):
+         """ running l_reward condition for n running time (in sec)"""
+        t_end = time.time()+ running_time
+        while time.time() < t_end:
+            if time.time() >= t_end:
+                break
+            self.read_ir()
+            self.signal_on_l_reward()
+
+    def run (self):
+        """main- alternate between conditions"""
+        while True:
+            self.r_reward(running_time = 60)
+            self.l_reward(running_time = 60)
+
+
+            # threading.Timer(WAIT_SECONDS, foo).start()
+        # t_end = time.time()+ 60
+        # while time.time() < t_end:
+        #     if time.time() >= t_end:
+        #         break
+        #     self.read_ir()
+        #     self.signal_on_r_reward()
+      
+
+
+        #     sec = 60
+        #     timer = time.time()+sec
+        #     while time.time() < timer:
+        #     self.read_ir()
+        #     self.signal_on_r_reward()
 
 
 
@@ -246,7 +303,7 @@ if __name__ == "__main__":
     feeder = Feeder()
     # try:
     while True:
-        # feeder.run()
+        feeder.run()
         # f = feeder.signal_on()
         # print (f)
         #feeder.pump_it(1)
