@@ -3,7 +3,7 @@ import time
 import numpy as np
 import pandas as pd
 import csv
-from stereo import *  # playing files import
+from stereo_one_signal import *  # playing files import
 com_ir = 'COM14'
 com_pump = 'COM5'
 pump = serial.Serial(com_pump, 9600, timeout=1) # pump
