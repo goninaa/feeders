@@ -5,7 +5,7 @@ import threading
 
 tl = Timeloop()
 
-# @tl.job(interval=timedelta(seconds=2))
+@tl.job(interval=timedelta(seconds=2))
 def func_1():
     t_end = time.time()+ 3
     while time.time() < t_end:
@@ -16,7 +16,7 @@ def func_1():
         print (f'func_1 {t}')
         
 
-# @tl.job(interval=timedelta(seconds=4))
+@tl.job(interval=timedelta(seconds=4))
 def func_2():
     t_end = time.time()+ 3
     while time.time() < t_end:
@@ -29,13 +29,14 @@ def func_2():
        
 
 if __name__ == "__main__":
-    # tl.start(block=True)
-    while True:
-        a = func_1()
-        b = func_2()
-    # WAIT_TIME_SECONDS = 2
+    tl.start(block=True)
+    # while True:
+    #     a = func_1()
+    #     b = func_2()
+    WAIT_TIME_SECONDS = 2
 
-    # ticker = threading.Event()
-    # while not ticker.wait(WAIT_TIME_SECONDS):
-    #     func_1()
+    ticker = threading.Event()
+    while not ticker.wait(WAIT_TIME_SECONDS):
+        func_1()
+        func_2()
 
