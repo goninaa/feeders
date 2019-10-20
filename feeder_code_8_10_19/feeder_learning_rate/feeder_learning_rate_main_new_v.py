@@ -65,20 +65,8 @@ class Feeder:
         try:
             self.msg = ir.read() #Ir Reader
         except serial.SerialException as e:
-            self.dis_time()
-            try:
-                if (pump.isOpen()):
-                    pump.close()
-                if (ir.isOpen()):
-                    ir.close()
-                pump = serial.Serial(com_pump, 9600, timeout=1)  # pump
-                ir = serial.Serial(com_ir, 9600, timeout=5)  # IR
-                time.sleep(1) #3
-                print ("restart")
-            except serial.SerialException as e2:
-                    self.dis_time()
-                    print("I couldnt open the port jesus!!!")
-
+            self.fix_pump_ir
+              
         self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'feeder'] = self.msg
         self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
         self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
@@ -106,19 +94,7 @@ class Feeder:
                 self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
 
         except serial.SerialException as e:
-            self.dis_time()
-            try:
-                if(pump.isOpen()):
-                    pump.close()
-                if (ir.isOpen()):
-                    ir.close()
-                pump = serial.Serial(com_pump, 9600, timeout=1)  # pump
-                ir = serial.Serial(com_ir, 9600, timeout=5)  # IR
-                time.sleep(3)
-                print("restart")
-            except serial.SerialException as e2:
-                self.dis_time()
-                print("I couldnt open the port jesus!!!")
+            self.fix_pump_ir
 
     def decide (self):
         """check if bat true or false"""
@@ -128,7 +104,7 @@ class Feeder:
         elif self.msg == b'': # if reads "no bat"
             self.bat = False
 
-    def which_pump_reward (self, R_p=(1,0), L_p=(1,0)):
+    def which_pump (self, R_p=(1,0), L_p=(1,0)):
         """decide which pump to use. 
             right feeder with probability of 0.8
             left feeder probability 0.2"""
@@ -136,6 +112,24 @@ class Feeder:
             self.pump_it(pump_id = 1, L_p = L_p)
         elif self.msg == b'2':
             self.pump_it(pump_id = 2, R_p = R_p)
+
+    def fix_pump_ir (self):
+        """restart pump or ir in case of disconnection """
+        global ir
+        global pump
+        self.dis_time()
+        try:
+            if(pump.isOpen()):
+                pump.close()
+            if (ir.isOpen()):
+                ir.close()
+            pump = serial.Serial(com_pump, 9600, timeout=1)  # pump
+            ir = serial.Serial(com_ir, 9600, timeout=5)  # IR
+            time.sleep(3)
+            print("restart")
+        except serial.SerialException as e2:
+            self.dis_time()
+            print("I couldnt open the port jesus!!!")
 
     def dis_time (self):
         """ return current time to self.disconnect"""
@@ -145,27 +139,14 @@ class Feeder:
         with open("disconnect.txt", "w") as text_file:
             print(self.disconnect, file=text_file)
 
-    def clean (self, pumps=1):
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
+    def clean (self, pumps=10):
+        """function for cleaning fedders between uses"""
+        for i in range (pumps):
+            self.pump_it(1)
+            time.sleep(2)
+            self.pump_it(2)
+            time.sleep(2)
+    
 
 
     # def r_reward(self, rewarding_feeder= 'R', intervals = 20, running_time= 3600, R_p=(0.8,0.2), L_p=(0.2,0.8)):
