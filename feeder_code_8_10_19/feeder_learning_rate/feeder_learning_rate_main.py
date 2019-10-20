@@ -6,7 +6,7 @@ import csv
 from stereo_one_signal import *  # playing files import
 
 com_ir = 'COM14'
-com_pump = 'COM17'
+com_pump = 'COM5'
 pump = serial.Serial(com_pump, 9600, timeout=1) # pump
 ir = serial.Serial(com_ir, 9600, timeout=10)# IR
 
@@ -104,9 +104,9 @@ class Feeder:
             right feeder with probability of 0.8
             left feeder probability 0.2"""
         if self.msg == b'1':
-            self.pump_it(pump_id = 1, L_p = L_p)
+            self.pump_it(1, L_p)
         elif self.msg == b'2':
-            self.pump_it(pump_id = 2, R_p = R_p)
+            self.pump_it(2, R_p)
 
     def fix_pump_ir (self):
         """restart pump or ir in case of disconnection """
@@ -158,13 +158,13 @@ if __name__ == "__main__":
     cond2_L_p=(0.8,0.2) # left win-lose p in cond2
 
     while True:
-        # feeder.run( intervals, running_time, cond1_R_p, cond1_L_p, cond2_R_p, cond2_L_p)
+        feeder.run( intervals, running_time, cond1_R_p, cond1_L_p, cond2_R_p, cond2_L_p)
         # f = feeder.signal_on()
         # print (f)
-        feeder.pump_it(2)
-        time.sleep(2)
-        feeder.pump_it(1) #left
-        time.sleep(2)
+        # feeder.pump_it(2)
+        # time.sleep(2)
+        # feeder.pump_it(1) #left
+        # time.sleep(2)
        # feeder.pump_it(2)  # right
        # time.sleep(2)
        #  feeder.pump_it_20(1) #left

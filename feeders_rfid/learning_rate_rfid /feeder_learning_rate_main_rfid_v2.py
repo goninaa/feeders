@@ -7,7 +7,7 @@ from datetime import date
 from stereo_one_signal import *  # playing files import
 from class_read import *
 
-com_pump = 'COM17'
+com_pump = 'COM5'
 pump = serial.Serial(com_pump, 9600, timeout=1) # pump
 
 class Feeder:
@@ -105,9 +105,9 @@ class Feeder:
             right feeder with probability of 0.8
             left feeder probability 0.2"""
         if self.bat_loc == "b'101'": #left pump
-            self.pump_it(pump_id = 1, L_p = L_p)
+            self.pump_it(pump_id = 1, win_lose_p = L_p)
         elif self.bat_loc == "b'102'": #right pump
-            self.pump_it(pump_id = 2, R_p = R_p)
+            self.pump_it(pump_id = 2, win_lose_p = R_p)
           
     def fix_pump_ir (self):
         """restart pump or ir in case of disconnection """
