@@ -13,34 +13,36 @@ ir = serial.Serial(com_ir, 9600, timeout=10)# IR
 class Feeder:
 
     def __init__(self):
-        self.df_signal = pd.DataFrame(columns=['signal'])
-        self.df_ir = pd.DataFrame(columns=['feeder'])
-        self.df_pump = pd.DataFrame(columns=['pump'])
-        self.df_cond = pd.DataFrame(columns=['condition'])
+        self.df = pd.DataFrame(columns=['signal','feeder','pump','condition'])
+        # self.df_signal = pd.DataFrame(columns=['signal'])
+        # self.df_ir = pd.DataFrame(columns=['feeder'])
+        # self.df_pump = pd.DataFrame(columns=['pump'])
+        # self.df_cond = pd.DataFrame(columns=['condition'])
         self.disconnect = []
-        self.df_all = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
+        # self.df_all = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
         self.msg = "first msg"
         self.bat = False
         self.cond = None
 
 
-    def signal_on_reward (self, intervals = 20, running_time = 3200, R_p=(1,0), L_p=(1,0)):
+    def signal_on_reward (self, rewarding_feeder = 'R', intervals = 20, running_time = 3200, R_p=(1,0), L_p=(1,0)):
         """ intervals = 20 sec between signals"""
+        print (rewarding_feeder)
+        self.cond = (f'{rewarding_feeder} reward')
         tr_end = time.time() + running_time
         while time.time() < tr_end:
             if time.time() >= tr_end:
                 break
-
+            self.read_ir()
             while self.bat == False:
                 if time.time() >= tr_end:
                     break
                 signals = stereo('left_sig.wav', 'right_sig.wav')
-                self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.cond
-                print (f"{pd.Timestamp.now()} playing signal")
-                self.df_signal.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'play'
-                df = pd.concat([self.df_signal, self.df_ir, self.df_pump, self.df_cond], axis=1, sort = True)
-                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'signal'] = 'play'
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
                 # print (df)
+                print (f"{pd.Timestamp.now()} playing signal")
                 print (self.cond)
                 signals.run()  # play signals from both feeders
                 flag_t = 0
@@ -60,7 +62,6 @@ class Feeder:
         """read from ir reader, print the result and save to data frame in csv"""
         global ir
         global pump
-        global df_ir
         try:
             self.msg = ir.read() #Ir Reader
         except serial.SerialException as e:
@@ -78,10 +79,9 @@ class Feeder:
                     self.dis_time()
                     print("I couldnt open the port jesus!!!")
 
-        self.df_ir.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.msg
-        self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.cond
-        df = pd.concat([self.df_signal, self.df_ir, self.df_pump, self.df_cond], axis=1, sort = True)
-        df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+        self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'feeder'] = self.msg
+        self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+        self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
         print(self.msg) #print to screen
         self.decide()
 
@@ -96,14 +96,14 @@ class Feeder:
             val = np.random.choice(choice_arr, 1, p=win_lose_p)
             if(val == "win"):
                 pump.write([pump_id])
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = pump_id
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
                 print ("pumping")
-                self.df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = pump_id
-                df = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
-                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
-            else:
-                self.df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'no {}'.format(pump_id)
-                df = pd.concat([self.df_signal, self.df_ir, self.df_pump, self.df_cond], axis=1, sort = True)
-                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+            else: 
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = 'no {}'.format(pump_id)
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
 
         except serial.SerialException as e:
             self.dis_time()
@@ -168,27 +168,27 @@ class Feeder:
         self.pump_it(2)
 
 
-    def r_reward(self, intervals = 20, running_time= 3600, R_p=(0.8,0.2), L_p=(0.2,0.8)):
-        """ running r_reward condition for n running time (in sec)"""
-        print('R')
-        self.cond = 'R reward'
-        self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'R reward'
-        self.read_ir()
-        self.signal_on_reward(intervals, running_time, R_p, L_p)
+    # def r_reward(self, rewarding_feeder= 'R', intervals = 20, running_time= 3600, R_p=(0.8,0.2), L_p=(0.2,0.8)):
+    #     """ running r_reward condition for n running time (in sec)"""
+    #     print('R')
+    #     self.cond = 'R reward'
+    #     self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'R reward'
+    #     self.read_ir()
+    #     self.signal_on_reward(rewarding_feeder, intervals, running_time, R_p, L_p)
         
 
-    def l_reward(self, intervals = 20, running_time= 3600, R_p=(0.2,0.8), L_p=(0.8,0.2)):
-        """ running l_reward condition for n running time (in sec)"""
-        print ('L')
-        self.cond = 'L reward'
-        self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'L reward'
-        self.read_ir()
-        self.signal_on_reward(intervals, running_time, R_p, L_p)
+    # def l_reward(self, intervals = 20, running_time= 3600, R_p=(0.2,0.8), L_p=(0.8,0.2)):
+    #     """ running l_reward condition for n running time (in sec)"""
+    #     print ('L')
+    #     self.cond = 'L reward'
+    #     self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'L reward'
+    #     self.read_ir()
+    #     self.signal_on_reward(intervals, running_time, R_p, L_p)
 
     def run (self, intervals = 20, running_time= 3600, cond1_R_p=(0.8,0.2), cond1_L_p=(0.2,0.8), cond2_R_p=(0.2,0.8), cond2_L_p=(0.8,0.2)):
         """main- alternate between conditions"""
-        self.r_reward(intervals = intervals, running_time = running_time, R_p=cond1_R_p, L_p=cond1_L_p) # cond1
-        self.l_reward(intervals = intervals, running_time = running_time, R_p=cond2_R_p, L_p=cond2_L_p) #cond2
+        self.signal_on_reward(rewarding_feeder = 'R', intervals = intervals, running_time = running_time, R_p=cond1_R_p, L_p=cond1_L_p) # cond1
+        self.signal_on_reward(rewarding_feeder = 'L', intervals = intervals, running_time = running_time, R_p=cond2_R_p, L_p=cond2_L_p) #cond2
        
 if __name__ == "__main__":
     feeder = Feeder()
