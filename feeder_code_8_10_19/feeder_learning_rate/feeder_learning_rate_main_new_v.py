@@ -14,12 +14,7 @@ class Feeder:
 
     def __init__(self):
         self.df = pd.DataFrame(columns=['signal','feeder','pump','condition'])
-        # self.df_signal = pd.DataFrame(columns=['signal'])
-        # self.df_ir = pd.DataFrame(columns=['feeder'])
-        # self.df_pump = pd.DataFrame(columns=['pump'])
-        # self.df_cond = pd.DataFrame(columns=['condition'])
         self.disconnect = []
-        # self.df_all = pd.concat([self.df_signal, self.df_ir, self.df_pump], axis=1, sort = True)
         self.msg = "first msg"
         self.bat = False
         self.cond = None
@@ -146,25 +141,6 @@ class Feeder:
             time.sleep(2)
             self.pump_it(2)
             time.sleep(2)
-    
-
-
-    # def r_reward(self, rewarding_feeder= 'R', intervals = 20, running_time= 3600, R_p=(0.8,0.2), L_p=(0.2,0.8)):
-    #     """ running r_reward condition for n running time (in sec)"""
-    #     print('R')
-    #     self.cond = 'R reward'
-    #     self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'R reward'
-    #     self.read_ir()
-    #     self.signal_on_reward(rewarding_feeder, intervals, running_time, R_p, L_p)
-        
-
-    # def l_reward(self, intervals = 20, running_time= 3600, R_p=(0.2,0.8), L_p=(0.8,0.2)):
-    #     """ running l_reward condition for n running time (in sec)"""
-    #     print ('L')
-    #     self.cond = 'L reward'
-    #     self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'L reward'
-    #     self.read_ir()
-    #     self.signal_on_reward(intervals, running_time, R_p, L_p)
 
     def run (self, intervals = 20, running_time= 3600, cond1_R_p=(0.8,0.2), cond1_L_p=(0.2,0.8), cond2_R_p=(0.2,0.8), cond2_L_p=(0.8,0.2)):
         """main- alternate between conditions"""
