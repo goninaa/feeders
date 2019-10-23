@@ -8,6 +8,7 @@ def read_file(fname):
     df.index = pd.to_datetime(df.index)
     return df
 
+
 def find_activity(df, freq = '15Min', base = 8):
     # activity_df_60min = df.groupby(pd.Grouper(freq='60Min', base=base, label='right'))['feeder'].value_counts()
     activity_df_15min = df.groupby(pd.Grouper(freq=freq, base=base, label='right'))['feeder'].value_counts()
@@ -21,6 +22,19 @@ def fix_save_df (df):
     df = pd.read_csv('file', delimiter = ',', index_col= 'time')
     df.rename(columns={'feeder.1':'count'}, inplace=True)
     return df
+
+# def add_cond(df, new_df):
+#     new_df.where
+#     new_df['cond'] = 'R'
+
+# def get_reward_time(df):
+#     r_reward = df['condition'] == 'R reward'
+
+
+  
+# # filtering data 
+#     df.where(r_reward, inplace = True) 
+
 
 
 
@@ -39,6 +53,12 @@ def fix_save_df (df):
 if __name__ == "__main__":
     fname = '2019-10-21_dotline.csv'
     df = read_file(fname)
+    df = df.replace("b''", np.nan) 
+    print (df)
+    # r_reward = df['condition'] == 'R reward'
+    # l_reward = df['condition'] == 'L reward'
+    # print (df[l_reward])
+
     activity, activity_norm = find_activity(df, freq = '15Min', base = 8)
     activity_norm = fix_save_df(activity_norm)
     # print (activity_norm.iloc[0]['feeder'])
@@ -51,11 +71,11 @@ if __name__ == "__main__":
     b2_activity = b2_activity.drop(columns=['feeder'])
     # print (b2_activity)
 
-    is_b0 = activity_norm['feeder'] == "b''" #filter/mask
-    b0_activity = activity_norm[is_b0]
-    b0_activity.rename(columns={'count':'no_action'}, inplace=True)
-    b0_activity = b0_activity.drop(columns=['feeder'])
-    # print (b0_activity)
+    # is_b0 = activity_norm['feeder'] == "b''" #filter/mask
+    # b0_activity = activity_norm[is_b0]
+    # b0_activity.rename(columns={'count':'no_action'}, inplace=True)
+    # b0_activity = b0_activity.drop(columns=['feeder'])
+    # # print (b0_activity)
 
     is_b1 = activity_norm['feeder'] == "b'1'" #filter/mask
     b1_activity = activity_norm[is_b1]
@@ -67,7 +87,8 @@ if __name__ == "__main__":
     new_df = pd.concat([b1_activity,b2_activity], axis=1, sort = True)
     new_df =  new_df.fillna(0)
     new_df.to_csv('feeders_prob')
-    # print (new_df)
+    # new_df['cond'] = 'cond'
+    print (new_df)
 
     # df2= df.drop(columns=['signal','feeder','pump'])
     # new_df2 = pd.concat([new_df,df2], axis=1, sort = True)
@@ -80,11 +101,11 @@ if __name__ == "__main__":
 
     # x = np.arange(0, len(new_df.index), 10)
     #good ploting:
-    # new_df.plot(kind='line')
-    # plt.xlabel('time')
-    # plt.ylabel('activity (in %)')
-    # plt.xticks([])   
-    # plt.show()
+    new_df.plot(kind='line')
+    plt.xlabel('time')
+    plt.ylabel('activity (in %)')
+    plt.xticks([])   
+    plt.show()
 
 
     # # for i in activity_norm.index:
