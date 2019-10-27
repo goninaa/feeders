@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
+import matplotlib.dates as dt
 
 def read_file(fname):
     df = pd.read_csv(fname, delimiter = ',', index_col= 'time')
@@ -39,6 +40,15 @@ def fix_save_df (df):
 if __name__ == "__main__":
     fname = '2019-10-21_dotline.csv'
     df = read_file(fname)
+
+    df_Rreward = df['condition'] == "R reward" #filter/mask
+    df_Rreward = df[df_Rreward]
+    print (df_Rreward)
+    # df = df_Rreward
+
+    # reward_act, reward_act_norm = find_activity(df_Rreward, freq = '15Min', base = 8) #worng
+    # print (reward_act)
+
     activity, activity_norm = find_activity(df, freq = '15Min', base = 8)
     activity_norm = fix_save_df(activity_norm)
     # print (activity_norm.iloc[0]['feeder'])
@@ -63,11 +73,12 @@ if __name__ == "__main__":
     b1_activity = b1_activity.drop(columns=['feeder'])
     # print (b1_activity)
 
-    # new_df = pd.concat([b0_activity,b1_activity,b2_activity], axis=1, sort = True)
-    new_df = pd.concat([b1_activity,b2_activity], axis=1, sort = True)
+    new_df = pd.concat([b0_activity,b1_activity,b2_activity], axis=1, sort = True)
+    # new_df = pd.concat([b1_activity,b2_activity], axis=1, sort = True)
     new_df =  new_df.fillna(0)
     new_df.to_csv('feeders_prob')
     # print (new_df)
+    # print (df['condition'])
 
     # df2= df.drop(columns=['signal','feeder','pump'])
     # new_df2 = pd.concat([new_df,df2], axis=1, sort = True)
@@ -78,14 +89,30 @@ if __name__ == "__main__":
     # ax = activity_norm.plot(kind='bar',stacked=True)
     # new_df.plot(kind='bar')
 
-    # x = np.arange(0, len(new_df.index), 10)
+    # # x = np.arange(0, len(new_df.index), 10)
     #good ploting:
     # new_df.plot(kind='line')
+    # # plt.plot(df.index,df['condition'])
     # plt.xlabel('time')
     # plt.ylabel('activity (in %)')
-    # plt.xticks([])   
-    # plt.show()
+    # plt.xticks([]) 
 
+    # annotata
+    # x_line = datetime.fromisoformat('2019-10-20 20:23:00')
+    # # ax.annotata('R reward', xy = x_line, 230000),
+    # plt.axvline(x = x_line, linestyle = 'dashed', alpha = 0.5)
+
+    # df.amin = pd.to_datetime(df.amin).astype(datetime)
+    # df.amax = pd.to_datetime(df.amax).astype(datetime)
+    # df.dropna(axis=0, subset=['condition'])
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # ax = ax.xaxis_date()
+    # ax = plt.hlines(df.condition, dt.date2num(df.index), dt.date2num(df.index))
+
+    plt.show()
+
+   
 
     # # for i in activity_norm.index:
     # #     ax = activity_norm.iloc[i].plot(kind='bar')
