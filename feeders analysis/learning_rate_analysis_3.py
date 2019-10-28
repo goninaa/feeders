@@ -110,7 +110,7 @@ if __name__ == "__main__":
     # ax = ax.xaxis_date()
     # ax = plt.hlines(df.condition, dt.date2num(df.index), dt.date2num(df.index))
 
-    plt.show()
+    # plt.show()
 
    
 

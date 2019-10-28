@@ -12,7 +12,7 @@ class DATA:
 
     def time_index(self):
         """ add headers and convert time to datetimeIndex"""
-        self.df.columns = ["0", "A", "B", "TAG", "D", "db", "F", "time", "H", "ANTENNA", "J"]
+        self.df.columns = ["A", "B", "TAG", "D", "db", "F", "time", "H", "ANTENNA", "J"]
         self.df['TIME'] = pd.to_datetime(self.df['time'])
         self.df = self.df.set_index(['TIME'])
         self.df.pop('time')
@@ -21,7 +21,8 @@ class DATA:
         """ detrmine if there been activity in the last second"""
         # ten_sec_ago = (datetime.datetime.now()- datetime.timedelta(seconds=10))
         th_seconds = 3
-        second_ago = (datetime.datetime.utcnow()- datetime.timedelta(seconds=th_seconds))
+        second_ago = (datetime.datetime.now()- datetime.timedelta(seconds=th_seconds))
+        # second_ago = (datetime.datetime.utcnow()- datetime.timedelta(seconds=th_seconds))
         self.df = self.df.last('1s')
         row_time = self.df.index.unique()
         print (row_time[0])
@@ -69,7 +70,7 @@ class DATA:
 
 
 if __name__ == "__main__":
-    fname = 'test_06-07-2019.csv'
+    fname = 'test.csv'
     data = DATA(fname)
     data.run()
     print (data.bat)

@@ -4,46 +4,45 @@ import numpy as np
 import pandas as pd
 import csv
 from datetime import date
+from pathlib import Path
 from stereo_one_signal import *  # playing files import
 from class_read import *
 
-com_pump = 'COM3'
+com_pump = '/dev/ttyUSB1'
 pump = serial.Serial(com_pump, 9600, timeout=1) # pump
 
 class Feeder:
 
-    def __init__(self):
-        self.df_signal = pd.DataFrame(columns=['signal'])
-        self.df_feeder = pd.DataFrame(columns=['feeder'])
-        self.df_pump = pd.DataFrame(columns=['pump'])
-        self.df_cond = pd.DataFrame(columns=['condition'])
+    def __init__(self, fname):
+        self.df = pd.DataFrame(columns=['signal','feeder','pump','condition'])
         self.disconnect = []
-        self.df_all = pd.concat([self.df_signal, self.df_feeder, self.df_pump, self.df_cond], axis=1, sort = True)
         self.bat = False
-        self.cond = None
+        # self.cond = None
         self.fname = fname
         self.bat_loc = "no_bat"
 
 
-    def signal_on_reward (self, intervals = 20, running_time = 3200, R_p=(1,0), L_p=(1,0)):
+    def signal_on_reward (self, rewarding_feeder = 'R', intervals = 20, running_time = 3200, R_p=(1,0), L_p=(1,0)):
         """ intervals = 20 sec between signals"""
+        print (rewarding_feeder)
+        self.cond = (f'{rewarding_feeder} reward')
         tr_end = time.time() + running_time
         while time.time() < tr_end:
             if time.time() >= tr_end:
                 break
-
+            self.read_rfid()
+            time.sleep(1)
             while self.bat == False:
                 if time.time() >= tr_end:
                     break
                 signals = stereo('left_sig.wav', 'right_sig.wav')
-                self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.cond
-                print (f"{pd.Timestamp.now()} playing signal")
-                self.df_signal.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'play'
-                df = pd.concat([self.df_signal,self.df_feeder, self.df_pump, self.df_cond], axis=1, sort = True)
-                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
-                # print (df)
-                print (self.cond)
                 signals.run()  # play signals from both feeders
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'signal'] = 'play'
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                # print (df)
+                print (f"{pd.Timestamp.now()} playing signal")
+                print (self.cond)
                 flag_t = 0
                 t_end = time.time()+intervals
                 while time.time() < t_end:
@@ -51,8 +50,9 @@ class Feeder:
                         break
                     self.read_rfid()
                     self.decide()
+                    # time.sleep(1)
                     if self.bat == True and flag_t == 0:
-                        self.which_pump_reward(R_p, L_p)
+                        self.which_pump(R_p, L_p)
                         flag_t += 1
                 if self.bat == True:
                     break
@@ -62,11 +62,10 @@ class Feeder:
             data = DATA(self.fname)
             data.run()
             self.bat_loc = data.bat
-
-            self.df_feeder.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.bat_loc
-            self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.cond
-            df = pd.concat([self.df_signal,self.df_feeder, self.df_pump, self.df_cond], axis=1, sort = True)
-            df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+            
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'feeder'] = self.bat_loc
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+            self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             print(self.bat_loc) 
             self.decide()
 
@@ -76,32 +75,20 @@ class Feeder:
 
         try:
             choice_arr = ["win", "lose"]
-            val = np.random.choice(choice_arr, 1, p=[win_lose_p])
-            # val = 0 # val always = 0
+            val = np.random.choice(choice_arr, 1, p=win_lose_p)
             if(val == "win"):
                 pump.write([pump_id])
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = pump_id
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
                 print ("pumping")
-                self.df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = pump_id
-                self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.cond
-                df = pd.concat([self.df_signal,self.df_feeder, self.df_pump, self.df_cond], axis=1, sort = True)
-                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             else:
-                self.df_pump.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'no {}'.format(pump_id)
-                self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = self.cond
-                df = pd.concat([self.df_signal, self.df_feeder, self.df_pump, self.df_cond], axis=1, sort = True)
-                df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = 'no {}'.format(pump_id)
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
 
         except serial.SerialException as e:
-            self.dis_time()
-            try:
-                if(pump.isOpen()):
-                    pump.close()
-                pump = serial.Serial(com_pump, 9600, timeout=1)  # pump
-                time.sleep(3)
-                print("restart")
-            except serial.SerialException as e2:
-                self.dis_time()
-                print("I couldnt open the port jesus!!!")
+            self.fix_pump_ir
 
     def decide (self):
         """check if bat true or false"""
@@ -117,15 +104,32 @@ class Feeder:
             if self.bat_loc == "no_bat" and time.time() > t_end:
                 self.bat = False
 
-    def which_pump_reward (self, R_p=(1,0), L_p=(1,0)):
+    def which_pump (self, R_p=(1,0), L_p=(1,0)):
         """decide which pump to use. 
             right feeder with probability of 0.8
             left feeder probability 0.2"""
         if self.bat_loc == "b'101'": #left pump
-            self.pump_it(pump_id = 1, L_p = L_p)
+            self.pump_it(pump_id = 1, win_lose_p = L_p)
         elif self.bat_loc == "b'102'": #right pump
-            self.pump_it(pump_id = 2, R_p = R_p)
+            self.pump_it(pump_id = 2, win_lose_p = R_p)
           
+    def fix_pump_ir (self):
+        """restart pump or ir in case of disconnection """
+        global ir
+        global pump
+        self.dis_time()
+        try:
+            if(pump.isOpen()):
+                pump.close()
+            if (ir.isOpen()):
+                ir.close()
+            pump = serial.Serial(com_pump, 9600, timeout=1)  # pump
+            ir = serial.Serial(com_ir, 9600, timeout=5)  # IR
+            time.sleep(3)
+            print("restart")
+        except serial.SerialException as e2:
+            self.dis_time()
+            print("I couldnt open the port jesus!!!")
 
     def dis_time (self):
         """ return current time to self.disconnect"""
@@ -135,53 +139,27 @@ class Feeder:
         with open("disconnect.txt", "w") as text_file:
             print(self.disconnect, file=text_file)
 
-    def clean (self, pumps=1):
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(1)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-        self.pump_it(2)
-
-
-    def r_reward(self, intervals = 20, running_time= 3600, R_p=(0.8,0.2), L_p=(0.2,0.8)):
-        """ running r_reward condition for n running time (in sec)"""
-        print('R')
-        self.cond = 'R reward'
-        self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'R reward'
-        self.read_rfid()
-        self.signal_on_reward(intervals, running_time, R_p, L_p)
-        
-
-    def l_reward(self, intervals = 20, running_time= 3600, R_p=(0.2,0.8), L_p=(0.8,0.2)):
-        """ running l_reward condition for n running time (in sec)"""
-        print ('L')
-        self.cond = 'L reward'
-        self.df_cond.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S')] = 'L reward'
-        self.read_rfid()
-        self.signal_on_reward(intervals = intervals, running_time = running_time)
+    def clean (self, pumps=10):
+        """function for cleaning fedders between uses"""
+        for i in range (pumps):
+            self.pump_it(1)
+            time.sleep(2)
+            self.pump_it(2)
+            time.sleep(2)
 
     def run (self, intervals = 20, running_time= 3600, cond1_R_p=(0.8,0.2), cond1_L_p=(0.2,0.8), cond2_R_p=(0.2,0.8), cond2_L_p=(0.8,0.2)):
         """main- alternate between conditions"""
-        self.r_reward(intervals = intervals, running_time = running_time, R_p=cond1_R_p, L_p=cond1_L_p) # cond1
-        self.l_reward(intervals = intervals, running_time = running_time, R_p=cond2_R_p, L_p=cond2_L_p) #cond2
+        self.signal_on_reward(rewarding_feeder = 'R', intervals = intervals, running_time = running_time, R_p=cond1_R_p, L_p=cond1_L_p) # cond1
+        self.signal_on_reward(rewarding_feeder = 'L', intervals = intervals, running_time = running_time, R_p=cond2_R_p, L_p=cond2_L_p) #cond2
        
 if __name__ == "__main__":
-    feeder = Feeder()
+    filename = date.today().strftime("%d-%m-%y")
+    fname = f"test_{filename}.csv"
+    fname = "test_28-10-19.csv"
+    # fname = f"opt/cdm/bat_eat_data/test_{filename}.csv"
+    # data_folder = Path("opt/cdm/bat_eat_data")
+    # file_to_open = data_folder / fname
+    feeder = Feeder(fname)
     # variables:
     intervals = 20 # between signals (in sec)
     running_time = 3600 # running time of each condition (in sec) 
@@ -190,6 +168,9 @@ if __name__ == "__main__":
     cond2_R_p=(0.2,0.8) # right win-lose p in cond2
     cond2_L_p=(0.8,0.2) # left win-lose p in cond2
 
+    # feeder.cond = 'R'
+    # read = feeder.read_rfid()
+    # print (read)
     while True:
         feeder.run( intervals, running_time, cond1_R_p, cond1_L_p, cond2_R_p, cond2_L_p)
         # f = feeder.signal_on()
@@ -205,7 +186,7 @@ if __name__ == "__main__":
        #  feeder.pump_it_80(2)  # right
        #  time.sleep(2)
       #
-        # read = feeder.read_ir()
+        # read = feeder.read_rfid()
         # print (read)
     # feeder.clean(1)
 

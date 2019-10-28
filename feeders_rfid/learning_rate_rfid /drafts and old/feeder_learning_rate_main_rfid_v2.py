@@ -7,7 +7,7 @@ from datetime import date
 from stereo_one_signal import *  # playing files import
 from class_read import *
 
-com_pump = 'COM5'
+com_pump = '/dev/ttyUSB1'
 pump = serial.Serial(com_pump, 9600, timeout=1) # pump
 
 class Feeder:
@@ -17,7 +17,7 @@ class Feeder:
         self.disconnect = []
         self.bat = False
         # self.cond = None
-        self.fname = fname
+        self.fname = 'fname'
         self.bat_loc = "no_bat"
 
 
