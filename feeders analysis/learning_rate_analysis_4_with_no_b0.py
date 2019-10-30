@@ -53,14 +53,16 @@ def fix_save_df (df):
 if __name__ == "__main__":
     fname = '2019-10-21_dotline.csv'
     df = read_file(fname)
-    df = df.replace("b''", np.nan) 
+    # df = df.replace("b''", np.nan) 
     # print (df)
     # r_reward = df['condition'] == 'R reward'
     # l_reward = df['condition'] == 'L reward'
     # print (df[l_reward])
 
-    activity, activity_norm = find_activity(df, freq = '15Min', base = 8)
+    activity, activity_norm = find_activity(df, freq = '10Min', base = 8)
     activity_norm = fix_save_df(activity_norm)
+    print (activity)
+    activity.to_csv('activity_10Min')
     # print (activity_norm.iloc[0]['feeder'])
     # print (len(activity_norm.index))
 
@@ -90,7 +92,7 @@ if __name__ == "__main__":
     # new_df = pd.concat([b0_activity,b1_activity,b2_activity], axis=1, sort = True)
     new_df = pd.concat([b1_activity,b2_activity], axis=1, sort = True)
     new_df =  new_df.fillna(0)
-    new_df.to_csv('feeders_prob')
+    # new_df.to_csv('feeders_prob')
     # new_df['cond'] = 'cond'
     # print (new_df)
 
@@ -105,13 +107,13 @@ if __name__ == "__main__":
 
     # x = np.arange(0, len(new_df.index), 10)
     #good ploting:
-    ax = new_df.plot(kind='line')
-    plt.plot(new_df.index,new_df['right'])
-    plt.xlabel('time')
-    plt.ylabel('activity (in %)')
-    plt.xticks([])   
+    # ax = new_df.plot(kind='line')
+    # plt.plot(new_df.index,new_df['right'])
+    # plt.xlabel('time')
+    # plt.ylabel('activity (in %)')
+    # plt.xticks([])   
    
-    plt.show()
+    # plt.show()
 
 
  # annotata

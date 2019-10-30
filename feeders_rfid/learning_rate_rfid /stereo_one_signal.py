@@ -3,11 +3,12 @@ import time
 
 class stereo:
 
-    def __init__(self, left_signal, right_signal, frequency=44000, size=-16,channels=2, buffer=4096): # 2 channels means stereo
+    def __init__(self, left_signal, right_signal, frequency=44000, size=-16,channels=1, buffer=4096): # 2 channels means stereo
         self.frequency = frequency
         self.size = size
         self.channels = channels
         self.buffer = buffer
+        # self.buffer = 2048
         pg.mixer.init(self.frequency, self.size, self.channels, self.buffer) 
         self.left_signal = pg.mixer.Sound(left_signal)
         self.right_signal = pg.mixer.Sound(right_signal)
@@ -38,8 +39,11 @@ class stereo:
 
 
 if __name__ == "__main__":
-
-    # st = stereo('left_sig.wav', 'right_sig.wav')
+    # while True: 
+        # st = stereo('left_sig.wav', 'right_sig.wav')
     st = stereo('right_sig.wav', 'left_sig.wav')
     st.run()
+        
+       
+
     
