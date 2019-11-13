@@ -77,27 +77,20 @@ class Feeder:
             data.run()
             self.activity = data.activity
             self.bat1_id = data.bat_id_1 
-            self.bat_id_2 = data.bat_id_2
+            self.bat2_id = data.bat_id_2
             self.loc_bat1 = data.loc_bat1
             self.loc_bat2 = data.loc_bat2
             
-            self.bat1_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_1'] = self.bat_id_1
-            self.bat2_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_2'] = self.bat_id_2
-            self.bat1_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
-            self.bat2_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
-            self.bat1_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
-            self.bat2_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
-            self.bat1_df.to_csv(f"bat1_{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
-            self.bat2_df.to_csv(f"bat2_{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_id'] = self.bat1_id
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_id'] = self.bat2_id
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_condition'] = self.cond
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_condition'] = self.cond
+            self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             # print(self.bat_loc) 
             # self.decide()
-            
-    # def pump_to_df(self,bat_df):
-    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = pump_id
-    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
-    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_1'] = self.bat_id_1
-    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
-    #         self.bat_df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+
 
     def pump_it (self, pump_id, win_lose_p = (1,0), bat = 'bat1'):
         """pump from selected pump with the selected probability"""
@@ -106,25 +99,29 @@ class Feeder:
         try:
             choice_arr = ["win", "lose"]
             val = np.random.choice(choice_arr, 1, p=win_lose_p)
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_id'] = self.bat1_id
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_id'] = self.bat2_id
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_condition'] = self.cond
+            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_condition'] = self.cond
+            self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             if(val == "win"):
                 pump.write([pump_id])
-              
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = pump_id
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_1'] = self.bat_id_1
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_2'] = self.bat_id_2
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
-                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                if bat == 'bat1':
+                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_pump'] = pump_id
+                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                elif bat == 'bat2':
+                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_pump'] = pump_id
+                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
                 print ("pumping")
             else:
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = 'no {}'.format(pump_id)
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_1'] = self.bat_id_1
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_2'] = self.bat_id_2
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
-                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                if bat == 'bat1':
+                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_pump'] = 'no {}'.format(pump_id)
+                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                elif bat == 'bat2':
+                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = 'no {}'.format(pump_id)
+                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
                 print ("no luck!")
 
         except serial.SerialException as e:
@@ -146,7 +143,7 @@ class Feeder:
     #         if self.bat_loc == "no_bat" and time.time() > t_end:
     #             self.bat = False
 
-    def which_pump (self, R_p=(1,0), L_p=(1,0)):
+    def which_pump (self, R_p=(1,0), L_p=(1,0)):  #not finished
         """decide which pump to use. 
             right feeder with probability of 0.8
             left feeder probability 0.2"""
