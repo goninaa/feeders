@@ -14,17 +14,20 @@ pump = serial.Serial(com_pump, 9600, timeout=1) # pump
 class Feeder:
 
     def __init__(self, fname):
-        self.df = pd.DataFrame(columns=['signal','bat_id_1','bat1_loc','bat_id_2','bat2_loc','pump','condition'])
+        self.df = pd.DataFrame(columns=['signal','bat1_id','bat1_loc','bat1_pump','bat1_condition',
+                                        'bat2_id','bat2_loc','bat2_pump','bat2_condition'])
         self.disconnect = []
         # self.bat = False
         # self.cond = None
         self.fname = fname
         # self.bat_loc = "no_bat"
-        self.bat_id_1 = None
-        self.bat_id_2 = None
+        self.bat1_id = None
+        self.bat2_id = None
         self.loc_bat1 = "no_bat"
         self.loc_bat2 = "no_bat"
         self.activity = False
+        # self.bat1_cond = ''
+        # self.bat2_cond = ''
 
 
     def signal_on_reward (self, rewarding_feeder = 'R', intervals = 20, running_time = 3200, R_p=(1,0), L_p=(1,0)):
@@ -44,8 +47,10 @@ class Feeder:
                 signals.run()  # play signals from both feeders
             
                 self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'signal'] = 'play'
-                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_condition'] = self.cond
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_condition'] = self.cond
                 self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+
                 # print (df)
                 print (f"{pd.Timestamp.now()} playing signal")
                 print (self.cond)
@@ -71,22 +76,30 @@ class Feeder:
             data = DATA(self.fname)
             data.run()
             self.activity = data.activity
-            self.bat_id_1 = data.bat_id_1 
+            self.bat1_id = data.bat_id_1 
             self.bat_id_2 = data.bat_id_2
             self.loc_bat1 = data.loc_bat1
             self.loc_bat2 = data.loc_bat2
             
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_1'] = self.bat_id_1
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_2'] = self.bat_id_2
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
-            self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+            self.bat1_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_1'] = self.bat_id_1
+            self.bat2_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_2'] = self.bat_id_2
+            self.bat1_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
+            self.bat2_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
+            self.bat1_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+            self.bat2_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+            self.bat1_df.to_csv(f"bat1_{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+            self.bat2_df.to_csv(f"bat2_{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             # print(self.bat_loc) 
             # self.decide()
             
+    # def pump_to_df(self,bat_df):
+    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = pump_id
+    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'condition'] = self.cond
+    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat_id_1'] = self.bat_id_1
+    #         self.bat_df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
+    #         self.bat_df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
 
-    def pump_it (self, pump_id, win_lose_p = (1,0)):
+    def pump_it (self, pump_id, win_lose_p = (1,0), bat = 'bat1'):
         """pump from selected pump with the selected probability"""
         global pump
 
