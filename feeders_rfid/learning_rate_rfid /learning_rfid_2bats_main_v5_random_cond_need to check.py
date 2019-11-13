@@ -14,8 +14,8 @@ pump = serial.Serial(com_pump, 9600, timeout=1) # pump
 class Feeder:
 
     def __init__(self, fname):
-        self.df = pd.DataFrame(columns=['signal','bat1_id','bat1_loc','bat1_pump','bat1_condition',
-                                        'bat2_id','bat2_loc','bat2_pump','bat2_condition'])
+        self.df = pd.DataFrame(columns=['signal','bat1_id','bat1_loc','pump_1','bat1_condition',
+                                        'bat2_id','bat2_loc','pump_2','bat2_condition'])
         self.disconnect = []
         # self.bat = False
         # self.cond = None
@@ -92,36 +92,33 @@ class Feeder:
             # self.decide()
 
 
-    def pump_it (self, pump_id, win_lose_p = (1,0), bat = 'bat1'):
+    def pump_it (self, pump_id, win_lose_p = (1,0)):
         """pump from selected pump with the selected probability"""
         global pump
 
         try:
             choice_arr = ["win", "lose"]
             val = np.random.choice(choice_arr, 1, p=win_lose_p)
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_id'] = self.bat1_id
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_id'] = self.bat2_id
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_condition'] = self.cond
-            self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_condition'] = self.cond
-            self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
             if(val == "win"):
                 pump.write([pump_id])
-                if bat == 'bat1':
-                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_pump'] = pump_id
-                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
-                elif bat == 'bat2':
-                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_pump'] = pump_id
-                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_id'] = self.bat1_id
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_id'] = self.bat2_id
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_condition'] = self.cond
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_condition'] = self.cond
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),f'pump_{pump_id}'] = pump_id
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
                 print ("pumping")
             else:
-                if bat == 'bat1':
-                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_pump'] = 'no {}'.format(pump_id)
-                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
-                elif bat == 'bat2':
-                    self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'pump'] = 'no {}'.format(pump_id)
-                    self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_id'] = self.bat1_id
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_id'] = self.bat2_id
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_loc'] = self.loc_bat1
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_loc'] = self.loc_bat2
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat1_condition'] = self.cond
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_condition'] = self.cond
+                self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),f'pump_{pump_id}'] = 'no {}'.format(pump_id)
+                self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}.csv")
                 print ("no luck!")
 
         except serial.SerialException as e:
@@ -143,7 +140,7 @@ class Feeder:
     #         if self.bat_loc == "no_bat" and time.time() > t_end:
     #             self.bat = False
 
-    def which_pump (self, R_p=(1,0), L_p=(1,0)):  #not finished
+    def which_pump (self, R_p=(1,0), L_p=(1,0)): 
         """decide which pump to use. 
             right feeder with probability of 0.8
             left feeder probability 0.2"""
