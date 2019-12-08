@@ -43,6 +43,12 @@ class Data:
     # def mean_pref(self, min = '10Min'): #not finished
     #     mean_pref = self.df_score.resample(min, self.base, label='right').mean()
 
+    def fill_bat_id_gaps (self, gap_limit = 10):
+        """ fills gaps in reading bat_ids, good when there is more than 2 bats
+        and we need to know which one activiated the feeder"""
+        self.df['bat1_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
+        self.df['bat2_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
+
     def find_base(self):
         self.base = self.df.index[0].minute
 
