@@ -42,24 +42,6 @@ class Data:
             self.df_score.sum_pump.replace(0, np.nan, inplace=True)
         self.df_score.to_csv(f"{self.fname}_score.csv")
 
-    # def pump_score(self, fill_na = True): #if first option doesn't work
-    #     """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
-    #     score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-    #     self.df_score = self.df.copy()
-    #     mapping_1 = {'no 1': -1, '1': -1}
-    #     mapping_2 = {'no 2': 1, '2': 1}
-    #     self.df_score['pump_1'].fillna(0, inplace= True)
-    #     self.df_score['pump_2'].fillna(0, inplace= True)
-    #     self.df_score =  self.df_score.astype({'pump_1': 'object', 'pump_2': 'object'})
-    #     self.df_score.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
-    #     self.df_score =  self.df_score.astype({'pump_1': 'int', 'pump_2': 'int'})
-    #     self.df_score['sum_pump'] = self.df_score['pump_1']+self.df_score['pump_2']
-    #     if fill_na == False: # when fill_na=False only results where bat chose will be taken into account
-    #         self.df_score.sum_pump.replace(0, np.nan, inplace=True)
-    #     self.df_score.to_csv(f"{self.fname}_score.csv")
-
- 
-
 
     # def mean_pref(self, min = '10Min'): #not finished
     #     mean_pref = self.df_score.resample(min, self.base, label='right').mean()
@@ -190,15 +172,13 @@ if __name__ == "__main__":
     # fname = '2019-11-15.csv'
     # fname = '2019-12-02_precent.csv'
     # fname = '2019-12-16_S_X.csv' #not working
-    fname = '2019-12-05_S_no_entrance.csv'
-    # f = pd.read_csv(fname)
-    # print (f.dtypes)
-   
-    exp = Data(fname)#!
+    fname = '2019-12-20_S_dot_line_train.csv'
+
+
+    exp = Data(fname)
     # exp.time_to_index()
     # exp.fill_bat_id_gaps()
-    exp.run_fill_na()#!
-    exp = Data(fname)
+    # exp.run_fill_na()
     exp.run()
     # exp.basic_stat()
     # print (exp.df_stat)
