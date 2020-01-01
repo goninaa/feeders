@@ -4,6 +4,9 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.dates as md
 import matplotlib.patches as mpatches
+# import plotly.graph_objs as go
+# import plotly.plotly as py
+# import plotly.offline as po
 
 class Data:
     def __init__ (self,fname):
@@ -26,37 +29,52 @@ class Data:
         """ return the sum of choices that did each bat into a new df """
         # df_stat = self.df.copy().groupby('feeder').count()
         self.df_stat = self.df.copy().groupby('bat1_condition').count()
-        self.df_stat.drop(['signal'], axis=1, inplace=True)
+        self.df_stat.drop(['signal', 'bat1_id', 'bat1_loc', 'bat2_id', 'bat2_loc', 'bat2_condition'], axis=1, inplace=True)
+        print (self.df_stat)
         
-    def pump_score(self, fill_na = True):
+    # def pump_score(self, fill_na = True):
+    #     """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
+    #     score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
+    #     # self.df_score = pd.DataFrame(self.df.copy())
+    #     mapping_1 = {'no 1': -1, '1': -1}
+    #     mapping_2 = {'no 2': 1, '2': 1}
+    #     self.df_score.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
+    #     self.df_score['pump_1'].fillna(0, inplace= True)
+    #     self.df_score['pump_2'].fillna(0, inplace= True)
+    #     self.df_score['sum_pump'] = self.df_score['pump_1']+self.df_score['pump_2']
+    #     if fill_na == False: # when fill_na=False only results where bat chose will be taken into account
+    #         self.df_score.sum_pump.replace(0, np.nan, inplace=True)
+    #     self.df_score.to_csv(f"{self.fname}_score.csv")
+
+    def pump_score(self, fill_na = True): #if first option doesn't work
         """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
         score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-        self.df_score = pd.DataFrame(self.df.copy())
+        self.df_score = self.df.copy()
         mapping_1 = {'no 1': -1, '1': -1}
         mapping_2 = {'no 2': 1, '2': 1}
-        self.df_score.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
         self.df_score['pump_1'].fillna(0, inplace= True)
         self.df_score['pump_2'].fillna(0, inplace= True)
+        self.df_score =  self.df_score.astype({'pump_1': 'object', 'pump_2': 'object'})
+        self.df_score.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
+        self.df_score =  self.df_score.astype({'pump_1': 'int', 'pump_2': 'int'})
         self.df_score['sum_pump'] = self.df_score['pump_1']+self.df_score['pump_2']
         if fill_na == False: # when fill_na=False only results where bat chose will be taken into account
             self.df_score.sum_pump.replace(0, np.nan, inplace=True)
         self.df_score.to_csv(f"{self.fname}_score.csv")
 
-    # def pump_score(self, fill_na = True): #if first option doesn't work
-    #     """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
-    #     score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-    #     self.df_score = self.df.copy()
-    #     mapping_1 = {'no 1': -1, '1': -1}
-    #     mapping_2 = {'no 2': 1, '2': 1}
-    #     self.df_score['pump_1'].fillna(0, inplace= True)
-    #     self.df_score['pump_2'].fillna(0, inplace= True)
-    #     self.df_score =  self.df_score.astype({'pump_1': 'object', 'pump_2': 'object'})
-    #     self.df_score.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
-    #     self.df_score =  self.df_score.astype({'pump_1': 'int', 'pump_2': 'int'})
-    #     self.df_score['sum_pump'] = self.df_score['pump_1']+self.df_score['pump_2']
-    #     if fill_na == False: # when fill_na=False only results where bat chose will be taken into account
-    #         self.df_score.sum_pump.replace(0, np.nan, inplace=True)
-    #     self.df_score.to_csv(f"{self.fname}_score.csv")
+    def match (self):
+        """ add a column with y/n if value was as expected or not. later used for plotting"""
+        self.df_score = pd.DataFrame(self.df.copy())
+        self.df_score['match'] = np.where( 
+                                ( (self.df_score['pump_1'] == '1') & (self.df_score['bat2_condition'] == 'L reward' ) ) 
+                                | ( (self.df_score['pump_1'] == 'no 1') & (self.df_score['bat2_condition'] == 'R reward' ) )
+                                | ( (self.df_score['pump_2'] == '2') & (self.df_score['bat2_condition'] == 'R reward' ))
+                                | ( (self.df_score['pump_2'] == 'no 2') & (self.df_score['bat2_condition'] == 'L reward' ))
+                                , 's', 'x')
+
+        # print (self.df_score[self.df_score['match'] == 'y'])
+        # self.df.rename(columns={'Unnamed: 0' :'time'}, inplace=True)
+        self.df_score.to_csv(f"{self.fname}_score.csv")
 
  
 
@@ -95,6 +113,51 @@ class Data:
         df_max = df.iloc[idx_list_max]
         self.condition_start_end = list(zip(self.df_min.index, df_max.index))
 
+    def plot_all_choices_match(self, name):
+        """ """
+        pd.plotting.register_matplotlib_converters(explicit=True)
+
+        # y_match = self.df_score[self.df_score['match'] == 'y']
+        # n_match = self.df_score[self.df_score['match'] == 'n']
+
+        fig = plt.figure(figsize=(10,10))
+        figtemp, ax = plt.subplots(1, 1)
+        plt.style.use('seaborn')
+        # choices = plt.plot_date(self.df_score.index, self.df_score['sum_pump'], marker = (np.where((self.df_score[self.df_score['match'] == 'y']), 's', 'x')), linestyle=':')
+        self.df_score['time'] = pd.to_datetime(self.df_score.index, dayfirst=True)
+        # pd.to_datetime(self.df_score['time'], dayfirst=True)
+        data = self.df_score
+        # sns.scatterplot(data=data, x='time', y='sum_pump', style='match')
+        # sns.scatterplot( x=self.df_score['time'], y='sum_pump', style='match', data=data)
+        sns.lineplot( x=self.df_score['time'], y=self.df_score['sum_pump'], hue=self.df_score['match'], style = self.df_score['match'], data=data, markers= True)
+        # sns.lineplot( x=self.df_score['time'], y=self.df_score['sum_pump'], data=data, markers= True)
+        # g.fig.autofmt_xdate()
+        # plt.title (f'bats choices')
+        # plt.ylabel('1 = right feeder, (-1) = left feeder')
+        # # Set time format and the interval of ticks (every 15 minutes)
+        # xformatter = md.DateFormatter('%H:%M')
+        # xlocator = md.MinuteLocator(interval = 60)
+        # # Set xtick labels to appear every 60 minutes
+        # ax.xaxis.set_major_locator(xlocator)
+        # ## Format xtick labels as HH:MM
+        # plt.gcf().axes[0].xaxis.set_major_formatter(xformatter)
+        # # rotate_labels
+        # for label in ax.get_xticklabels():
+        #     label.set_rotation(40)
+        #     label.set_horizontalalignment('right')
+
+        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r'}
+        # cond_dict = { 'unknown': 'y', 'R reward': 'g', 'equal reward': 'r'}
+        # cond_dict = { self.conds[2]: 'y', self.conds[0]: 'g', self.conds[1]: 'r'}
+        for min_time,max_time in self.condition_start_end:
+            cond = self.df_min.loc[min_time]['bat2_condition']
+            plt.axvspan(min_time,max_time, alpha=0.2, color=cond_dict[cond])
+        g_patch = mpatches.Patch(color='g', label='R reward')
+        r_patch = mpatches.Patch(color='r', label='L reward')
+        plt.legend(handles=[g_patch,r_patch], loc='upper right')
+        figtemp.savefig(f'{fname}_choices_plot_{name}.png')
+        figtemp.savefig(f'{fname}_choices_plot_{name}.svg')
+
     def plot_all_choices(self, name):
         """ """
         pd.plotting.register_matplotlib_converters(explicit=True)
@@ -127,6 +190,7 @@ class Data:
         r_patch = mpatches.Patch(color='r', label='L reward')
         plt.legend(handles=[g_patch,r_patch], loc='upper right')
         figtemp.savefig(f'{fname}_choices_plot_{name}.png')
+        figtemp.savefig(f'{fname}_choices_plot_{name}.svg')
 
     def plot_pref (self, minutes = '10Min', name= 'choices_only'): 
         """ """
@@ -152,7 +216,7 @@ class Data:
             label.set_rotation(40)
             label.set_horizontalalignment('right')
 
-        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r'}
+        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r', 'equal reward': '#008080'}
         # cond_dict = { 'unknown': 'y', 'R reward': 'g', 'equal reward': 'r'}
         # cond_dict = { self.conds[2]: 'y', self.conds[0]: 'g', self.conds[1]: 'r'}
         for min_time,max_time in self.condition_start_end:
@@ -162,6 +226,8 @@ class Data:
         r_patch = mpatches.Patch(color='r', label='L reward')
         plt.legend(handles=[g_patch,r_patch], loc='upper right')
         figtemp.savefig(f'{fname}_{minutes}_mean_plot_{name}.png')
+        figtemp.savefig(f'{fname}_{minutes}_mean_plot_{name}.svg')
+        plt.show()
        
 
 
@@ -169,20 +235,28 @@ class Data:
     def run_fill_na(self):
         self.time_to_index()
         self.find_base()
+        self.match()
         self.pump_score()
         # self.pump_score(fill_na=False)
         self.cond_times()
         self.plot_pref (minutes = '10Min', name = 'fill_na')
+        self.plot_pref (minutes = '60Min', name = 'fill_na')
         self.plot_all_choices('fill_na')
+        self.basic_stat()
+        # print (self.df_stat)
 
     def run(self):
         self.time_to_index()
         self.find_base()
+        self.match() 
         # self.pump_score()
         self.pump_score(fill_na=False)
         self.cond_times()
-        self.plot_pref (minutes = '10Min', name = 'choices_only')
-        self.plot_all_choices('choices_only')
+        # self.plot_pref (minutes = '10Min', name = 'choices_only')
+        # self.plot_pref (minutes = '60Min', name = 'choices_only')
+        self.plot_all_choices_match('choices_only')
+        self.basic_stat()
+        # print (self.df_stat)
 
 
 if __name__ == "__main__":
@@ -190,16 +264,19 @@ if __name__ == "__main__":
     # fname = '2019-11-15.csv'
     # fname = '2019-12-02_precent.csv'
     # fname = '2019-12-16_S_X.csv' #not working
-    fname = '2019-12-05_S_no_entrance.csv'
+    fname = '2019-12-20_S_dot_line_train.csv'
+    # fname = '2019-12-30_shraga_hagai_training.csv'
     # f = pd.read_csv(fname)
     # print (f.dtypes)
    
-    exp = Data(fname)#!
-    # exp.time_to_index()
-    # exp.fill_bat_id_gaps()
-    exp.run_fill_na()#!
     exp = Data(fname)
+    # exp.run_fill_na()
+    # exp = Data(fname)
     exp.run()
+
+    # exp.time_to_index()
+    # exp.match()
+    # exp.fill_bat_id_gaps()
     # exp.basic_stat()
     # print (exp.df_stat)
     # print (exp.df.head())
