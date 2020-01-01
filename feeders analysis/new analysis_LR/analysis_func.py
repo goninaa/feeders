@@ -49,7 +49,7 @@ class Data:
     def pump_score(self, fill_na = True): #if first option doesn't work
         """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
         score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-        self.df_score = self.df.copy()
+        # self.df_score = self.df.copy()
         mapping_1 = {'no 1': -1, '1': -1}
         mapping_2 = {'no 2': 1, '2': 1}
         self.df_score['pump_1'].fillna(0, inplace= True)
@@ -146,7 +146,8 @@ class Data:
         #     label.set_rotation(40)
         #     label.set_horizontalalignment('right')
 
-        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r'}
+        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r', 'equal reward': 'c'}
+        # cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r'}
         # cond_dict = { 'unknown': 'y', 'R reward': 'g', 'equal reward': 'r'}
         # cond_dict = { self.conds[2]: 'y', self.conds[0]: 'g', self.conds[1]: 'r'}
         for min_time,max_time in self.condition_start_end:
@@ -180,7 +181,8 @@ class Data:
             label.set_rotation(40)
             label.set_horizontalalignment('right')
 
-        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r'}
+        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r', 'equal reward': 'c'}
+        # cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r'}
         # cond_dict = { 'unknown': 'y', 'R reward': 'g', 'equal reward': 'r'}
         # cond_dict = { self.conds[2]: 'y', self.conds[0]: 'g', self.conds[1]: 'r'}
         for min_time,max_time in self.condition_start_end:
@@ -216,7 +218,7 @@ class Data:
             label.set_rotation(40)
             label.set_horizontalalignment('right')
 
-        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r', 'equal reward': '#008080'}
+        cond_dict = { 'unknown': 'y', 'R reward': 'g', 'L reward': 'r', 'equal reward': 'c'}
         # cond_dict = { 'unknown': 'y', 'R reward': 'g', 'equal reward': 'r'}
         # cond_dict = { self.conds[2]: 'y', self.conds[0]: 'g', self.conds[1]: 'r'}
         for min_time,max_time in self.condition_start_end:
@@ -250,7 +252,7 @@ class Data:
         self.find_base()
         self.match() 
         # self.pump_score()
-        self.pump_score(fill_na=False)
+        self.pump_score(fill_na=False) #not working correctly
         self.cond_times()
         # self.plot_pref (minutes = '10Min', name = 'choices_only')
         # self.plot_pref (minutes = '60Min', name = 'choices_only')
@@ -264,8 +266,8 @@ if __name__ == "__main__":
     # fname = '2019-11-15.csv'
     # fname = '2019-12-02_precent.csv'
     # fname = '2019-12-16_S_X.csv' #not working
-    fname = '2019-12-20_S_dot_line_train.csv'
-    # fname = '2019-12-30_shraga_hagai_training.csv'
+    # fname = '2019-12-20_S_dot_line_train.csv'
+    fname = '2019-12-30_shraga_hagai_training.csv'
     # f = pd.read_csv(fname)
     # print (f.dtypes)
    
