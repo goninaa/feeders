@@ -35,7 +35,7 @@ class Data:
     # def pump_score(self, fill_na = True):
     #     """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
     #     score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-    #     # self.df_score = pd.DataFrame(self.df.copy())
+    #     self.df_score = pd.DataFrame(self.df.copy())
     #     mapping_1 = {'no 1': -1, '1': -1}
     #     mapping_2 = {'no 2': 1, '2': 1}
     #     self.df_score.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
@@ -49,9 +49,9 @@ class Data:
     def pump_score(self, fill_na = True): #if first option doesn't work
         """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
         score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-        # self.df_score = self.df.copy()
-        mapping_1 = {'no 1': -1, '1': -1}
-        mapping_2 = {'no 2': 1, '2': 1}
+        # self.df_score = self.df.copy() 
+        mapping_1 = {'no 1': -1, 1: -1}
+        mapping_2 = {'no 2': 1, 2: 1}
         self.df_score['pump_1'].fillna(0, inplace= True)
         self.df_score['pump_2'].fillna(0, inplace= True)
         self.df_score =  self.df_score.astype({'pump_1': 'object', 'pump_2': 'object'})
@@ -252,10 +252,10 @@ class Data:
         self.find_base()
         self.match() 
         # self.pump_score()
-        self.pump_score(fill_na=False) #not working correctly
+        self.pump_score(fill_na=False) 
         self.cond_times()
-        # self.plot_pref (minutes = '10Min', name = 'choices_only')
-        # self.plot_pref (minutes = '60Min', name = 'choices_only')
+        self.plot_pref (minutes = '10Min', name = 'choices_only')
+        self.plot_pref (minutes = '60Min', name = 'choices_only')
         self.plot_all_choices_match('choices_only')
         self.basic_stat()
         # print (self.df_stat)
