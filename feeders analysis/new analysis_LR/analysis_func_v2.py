@@ -18,6 +18,10 @@ class Data:
         self.conds = [self.df['bat2_condition'].unique()]
         self.df_min = None
         self.df_stat = pd.DataFrame()
+        self.bats_stat_df = pd.DataFrame(columns=['bat_id','pump_1_reward','pump_1_no_reward',
+                                        'pump_2_reward','pump_2_no_reward', 'pump_1_sum', 'pump_2_sum',
+                                        'pumps_sum'])
+        self.df_filled = pd.DataFrame()
 
     def time_to_index(self):
         """change time column into datetime index"""
@@ -31,22 +35,37 @@ class Data:
         self.df_stat = self.df.copy().groupby('bat1_condition').count()
         self.df_stat.drop(['signal', 'bat1_id', 'bat1_loc', 'bat2_id', 'bat2_loc', 'bat2_condition'], axis=1, inplace=True)
         print (self.df_stat)
-        
-    # def pump_score(self, fill_na = True):
-    #     """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
-    #     score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-    #     self.df_score = pd.DataFrame(self.df.copy())
-    #     mapping_1 = {'no 1': -1, '1': -1}
-    #     mapping_2 = {'no 2': 1, '2': 1}
-    #     self.df_score.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
-    #     self.df_score['pump_1'].fillna(0, inplace= True)
-    #     self.df_score['pump_2'].fillna(0, inplace= True)
-    #     self.df_score['sum_pump'] = self.df_score['pump_1']+self.df_score['pump_2']
-    #     if fill_na == False: # when fill_na=False only results where bat chose will be taken into account
-    #         self.df_score.sum_pump.replace(0, np.nan, inplace=True)
-    #     self.df_score.to_csv(f"{self.fname}_score.csv")
 
-    def pump_score(self, fill_na = True): #if first option doesn't work
+    def bats_stat(self): # not finished
+        """ statistics for each bat"""
+        # finding all unique tags:
+        tags = self.df_filled['bat1_id'].unique().tolist()
+        tags.extend(self.df_filled['bat2_id'].unique().tolist())
+        tags = list(set(tags))
+        tags = [x for x in tags if str(x) != 'nan']
+        # print (tags)
+        for tag in tags:
+            # tag_count = self.df_filled[self.df_filled['bat1_id']==tag].count(axis=0)
+            tag_count = self.df_filled[self.df_filled['bat2_id']==tag].count(axis=0)
+            # reward_count_1 = self.df_filled.groupby(['bat2_id','pump_1']).count()
+            reward_count_1 = self.df_filled.groupby(['bat2_id','pump_1'])
+            reward_count_2 = self.df_filled.groupby(['bat2_id','pump_2'])
+            # # print (tag_count)
+            # print (reward_count_1)
+            # print (reward_count_1.get_group((tag,'1')).count())
+            print (reward_count_1.get_group((tag,'1')).count()['pump_1'])
+            tag_dict = {'bat_id': tag, 
+                        'pump_1_reward': reward_count_1.get_group((tag,'1')).count()['pump_1'],
+                        'pump_1_no_reward': reward_count_1.get_group((tag,'no 1')).count()['pump_1'],
+                        'pump_2_reward': reward_count_2.get_group((tag,'2')).count()['pump_2'], 
+                        'pump_2_no_reward': reward_count_2.get_group((tag,'no 2')).count()['pump_2'], 
+                        'pump_1_sum': tag_count['pump_1'], 'pump_2_sum': tag_count['pump_2'], 
+                        'pumps_sum': (tag_count['pump_1']+tag_count['pump_2'])}
+            self.bats_stat_df = self.bats_stat_df.append(tag_dict, ignore_index=True)
+        print (self.bats_stat_df)
+        self.bats_stat_df.to_csv(f"{self.fname}_bats_stat.csv")
+        
+    def pump_score(self, fill_na = True): 
         """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
         score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
         # self.df_score = self.df.copy() 
@@ -85,9 +104,10 @@ class Data:
     def fill_bat_id_gaps (self, gap_limit = 10):
         """ fills gaps in reading bat_ids, good when there is more than 2 bats
         and we need to know which one activiated the feeder"""
-        self.df['bat1_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
-        self.df['bat2_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
-        self.df.to_csv(f'{fname}_fill_gaps.csv')
+        self.df_filled = self.df.copy()
+        self.df_filled['bat1_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
+        self.df_filled['bat2_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
+        self.df_filled.to_csv(f'{fname}_fill_gaps.csv')
 
     def find_base(self):
         self.base = self.df.index[0].minute
@@ -257,6 +277,7 @@ class Data:
         self.plot_pref (minutes = '10Min', name = 'choices_only')
         self.plot_pref (minutes = '60Min', name = 'choices_only')
         self.plot_all_choices_match('choices_only')
+        self.fill_bat_id_gaps()
         self.basic_stat()
         # print (self.df_stat)
 
@@ -266,8 +287,8 @@ if __name__ == "__main__":
     # fname = '2019-11-15.csv'
     # fname = '2019-12-02_precent.csv'
     # fname = '2019-12-16_S_X.csv' #not working
-    # fname = '2019-12-20_S_dot_line_train.csv'
-    fname = '2019-12-30_lior_kaf_teit_gimel_training7.csv'
+    fname = '2019-12-20_S_dot_line_train.csv'
+    # fname = '2019-12-30_lior_kaf_teit_gimel_training7.csv'
     # f = pd.read_csv(fname)
     # print (f.dtypes)
    
@@ -279,6 +300,7 @@ if __name__ == "__main__":
     # exp.time_to_index()
     # exp.match()
     exp.fill_bat_id_gaps()
+    exp.bats_stat()
     # exp.basic_stat()
     # print (exp.df_stat)
     # print (exp.df.head())
