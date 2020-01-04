@@ -45,15 +45,16 @@ class Data:
         tags = [x for x in tags if str(x) != 'nan']
         # print (tags)
         for tag in tags:
-            # tag_count = self.df_filled[self.df_filled['bat1_id']==tag].count(axis=0)
-            tag_count = self.df_filled[self.df_filled['bat2_id']==tag].count(axis=0)
-            # reward_count_1 = self.df_filled.groupby(['bat2_id','pump_1']).count()
-            reward_count_1 = self.df_filled.groupby(['bat2_id','pump_1'])
-            reward_count_2 = self.df_filled.groupby(['bat2_id','pump_2'])
-            # # print (tag_count)
-            # print (reward_count_1)
+            tag_count = self.df_filled[self.df_filled['bat1_id']==tag].count(axis=0)
+            if tag_count['bat1_id'] == 0: #checks if tag is in bat1_id, if not than it in bat2_id
+                tag_count = self.df_filled[self.df_filled['bat2_id']==tag].count(axis=0)
+                reward_count_1 = self.df_filled.groupby(['bat2_id','pump_1'])
+                reward_count_2 = self.df_filled.groupby(['bat2_id','pump_2'])
+            else:
+                reward_count_1 = self.df_filled.groupby(['bat1_id','pump_1'])
+                reward_count_2 = self.df_filled.groupby(['bat1_id','pump_2'])
             # print (reward_count_1.get_group((tag,'1')).count())
-            print (reward_count_1.get_group((tag,'1')).count()['pump_1'])
+            # print (reward_count_1.get_group((tag,'1')).count()['pump_1'])
             tag_dict = {'bat_id': tag, 
                         'pump_1_reward': reward_count_1.get_group((tag,'1')).count()['pump_1'],
                         'pump_1_no_reward': reward_count_1.get_group((tag,'no 1')).count()['pump_1'],
