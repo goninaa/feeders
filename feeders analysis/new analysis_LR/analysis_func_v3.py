@@ -29,6 +29,11 @@ class Data:
         self.df.index = pd.to_datetime(self.df['time'], dayfirst=True)
         self.df.drop(['time'], axis=1, inplace=True)
 
+    def remove_duplicated(self):
+        """remove duplicated timestamps while keeping last value"""
+        bool_series = self.df['Unnamed: 0'].duplicated(keep = 'last')
+        self.df = self.df[~bool_series] 
+
     def basic_stat(self): #not finished
         """ return the sum of choices that did each bat into a new df """
         # df_stat = self.df.copy().groupby('feeder').count()
