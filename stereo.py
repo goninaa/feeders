@@ -33,5 +33,7 @@ class stereo:
 if __name__ == "__main__":
 
     # st = stereo('left_sig.wav', 'right_sig.wav')
-    # st.run()
+    st = stereo('left_sig.wav', 'left_sig.wav')
+    st.run()
+    # st.play_left()
     
