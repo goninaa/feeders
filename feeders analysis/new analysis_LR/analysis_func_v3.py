@@ -22,6 +22,9 @@ class Data:
                                         'pump_2_reward','pump_2_no_reward', 'pump_1_sum', 'pump_2_sum',
                                         'pumps_sum'])
         self.df_filled = pd.DataFrame()
+        self.stay_prob_df = pd.DataFrame()
+        self.stay_num_df = None
+        self.proba_df = None
 
     def time_to_index(self):
         """change time column into datetime index"""
@@ -29,7 +32,7 @@ class Data:
         self.df.index = pd.to_datetime(self.df['time'], dayfirst=True)
         self.df.drop(['time'], axis=1, inplace=True)
 
-    def remove_duplicated(self):
+    def remove_duplicated(self): #not in use
         """remove duplicated timestamps while keeping last value"""
         bool_series = self.df['Unnamed: 0'].duplicated(keep = 'last')
         self.df = self.df[~bool_series] 
@@ -48,27 +51,32 @@ class Data:
         tags.extend(self.df_filled['bat2_id'].unique().tolist())
         tags = list(set(tags))
         tags = [x for x in tags if str(x) != 'nan']
-        print (tags)
+        # print (tags)
         for tag in tags:
             tag_count = self.df_filled[self.df_filled['bat1_id']==tag].count(axis=0)
-            # print (tag_count)
-            if tag_count['bat1_id'] == 0: #checks if tag is in bat1_id, if not than it in bat2_id
-                tag_count = self.df_filled[self.df_filled['bat2_id']==tag].count(axis=0)
-                reward_count_1 = self.df_filled.groupby(['bat2_id','pump_1'])
-                reward_count_2 = self.df_filled.groupby(['bat2_id','pump_2'])
-            else:
-                reward_count_1 = self.df_filled.groupby(['bat1_id','pump_1'])
-                reward_count_2 = self.df_filled.groupby(['bat1_id','pump_2'])
-            
-            # print (reward_count_1.get_group((tag,'1')).count())
-            # print (reward_count_1.get_group((tag,'1')).count()['pump_1'])
-            tag_dict = {'bat_id': tag, 
-                        'pump_1_reward': reward_count_1.get_group((tag,'1')).count()['pump_1'],
-                        'pump_1_no_reward': reward_count_1.get_group((tag,'no 1')).count()['pump_1'],
-                        'pump_2_reward': reward_count_2.get_group((tag,'2')).count()['pump_2'], 
-                        'pump_2_no_reward': reward_count_2.get_group((tag,'no 2')).count()['pump_2'], 
-                        'pump_1_sum': tag_count['pump_1'], 'pump_2_sum': tag_count['pump_2'], 
-                        'pumps_sum': (tag_count['pump_1']+tag_count['pump_2'])}
+            print (tag)
+            # print(tag_count['bat1_id'])
+            try:
+                if tag_count['bat1_id'] == 0: #checks if tag is in bat1_id, if not than it in bat2_id
+                    tag_count = self.df_filled[self.df_filled['bat2_id']==tag].count(axis=0)
+                    # print (tag_count)
+                    reward_count_1 = self.df_filled.groupby(['bat2_id','pump_1'])
+                    reward_count_2 = self.df_filled.groupby(['bat2_id','pump_2'])
+                else:
+                    reward_count_1 = self.df_filled.groupby(['bat1_id','pump_1'])
+                    reward_count_2 = self.df_filled.groupby(['bat1_id','pump_2'])
+                
+                # print (reward_count_1.get_group((tag,'1')).count())
+                # print (reward_count_1.get_group((tag,'1')).count()['pump_1'])
+                tag_dict = {'bat_id': tag, 
+                            'pump_1_reward': reward_count_1.get_group((tag,'1')).count()['pump_1'],
+                            'pump_1_no_reward': reward_count_1.get_group((tag,'no 1')).count()['pump_1'],
+                            'pump_2_reward': reward_count_2.get_group((tag,'2')).count()['pump_2'], 
+                            'pump_2_no_reward': reward_count_2.get_group((tag,'no 2')).count()['pump_2'], 
+                            'pump_1_sum': tag_count['pump_1'], 'pump_2_sum': tag_count['pump_2'], 
+                            'pumps_sum': (tag_count['pump_1']+tag_count['pump_2'])}
+            except:
+                print ('stat_problem')
         
             self.bats_stat_df = self.bats_stat_df.append(tag_dict, ignore_index=True)
 
@@ -81,7 +89,7 @@ class Data:
     def pump_score(self, fill_na = True): 
         """ give score 1 to each right feeder choice, score (-1) to left feeder choice,
         score 0 when no choice been made (only if fillna = True). save this df into a csv file"""
-        # self.df_score = self.df.copy() 
+        self.df_score = self.df.copy() 
         mapping_1 = {'no 1': -1, 1: -1}
         mapping_2 = {'no 2': 1, 2: 1}
         self.df_score['pump_1'].fillna(0, inplace= True)
@@ -108,7 +116,76 @@ class Data:
         # self.df.rename(columns={'Unnamed: 0' :'time'}, inplace=True)
         self.df_score.to_csv(f"{self.fname}_score.csv")
 
- 
+    def stay_prob (self):
+        """ יש לך 4 אפשרויות. כמו באיור. פידר א גמול, א בלי גמול וכו. 
+        נגיד שבחלון היו עשרה מקרים של א עם גמול, 
+        מה הסיכוי שההחלטה היתה להשאר, כלומר לחזור ל-א"""
+        # series.resample('3T').sum()
+        # shift_df = self.df.copy().shift()
+        ## prepare df:
+        self.stay_prob_df = self.df.copy()
+        mapping_1 = {'no 1': -1}
+        mapping_2 = {'no 2': -2}
+        self.stay_prob_df['pump_1'].fillna(0, inplace= True)
+        self.stay_prob_df['pump_2'].fillna(0, inplace= True)
+        self.stay_prob_df = self.stay_prob_df.astype({'pump_1': 'object', 'pump_2': 'object'})
+        self.stay_prob_df.replace({'pump_1': mapping_1, 'pump_2': mapping_2}, inplace= True)
+        self.stay_prob_df = self.stay_prob_df.astype({'pump_1': 'int', 'pump_2': 'int'})
+        self.stay_prob_df['sum_pump'] = self.stay_prob_df['pump_1']+self.stay_prob_df['pump_2']
+        self.stay_prob_df['sum_pump'].replace(0, np.nan, inplace = True)
+        # self.stay_prob_df.sum_pump.replace(0, np.nan, inplace=True)
+        self.stay_prob_df.dropna(subset=['sum_pump'],inplace = True)
+        self.stay_prob_df['pre_choice'] = self.stay_prob_df['sum_pump'].shift(1)
+        self.stay_prob_df['choice'] = self.stay_prob_df['sum_pump']
+        map_choice = {-1:1,-2:2}
+        self.stay_prob_df.replace({'choice': map_choice}, inplace= True)
+
+    def stay_change_to_df(self,cond): #new version
+        """ create stay-change number (for specefic condition) df based on stay_prob func"""
+        # df1 = exp.stay_prob_df
+        df1= exp.stay_prob_df[exp.stay_prob_df['bat2_condition']== cond].copy()
+        # print (df1)
+        #create masks for pump_1
+        reward_1_stay = (df1['pre_choice']==1) & (df1['choice']==1)
+        reward_1_change = (df1['pre_choice']==1) & (df1['choice']==2)
+        unreward_1_stay = (df1['pre_choice']==-1) & (df1['choice']==1)
+        unreward_1_change = (df1['pre_choice']==-1) & (df1['choice']==2)
+        #create masks for pump_2
+        reward_2_stay = (df1['pre_choice']==2) & (df1['choice']==2)
+        reward_2_change = (df1['pre_choice']==2) & (df1['choice']==1)
+        unreward_2_stay = (df1['pre_choice']==-2) & (df1['choice']==2)
+        unreward_2_change = (df1['pre_choice']==-2) & (df1['choice']==1)
+        #create dict 
+        reward = {'stay_1':df1[reward_1_stay].choice.count(), 'change_1':df1[reward_1_change].choice.count(),
+                  'stay_2':df1[reward_2_stay].choice.count(), 'change_2':df1[reward_2_change].choice.count()}
+        unreward = {'stay_1':df1[unreward_1_stay].choice.count(), 'change_1':df1[unreward_1_change].choice.count(),
+                    'stay_2':df1[unreward_2_stay].choice.count(), 'change_2':df1[unreward_2_change].choice.count()}
+        proba_dict = {'reward' :reward,'unreward':unreward}
+       
+        self.stay_num_df = pd.DataFrame(proba_dict)
+
+
+    def stay_prob_to_df(self):
+        """ create stay-change probability df based on..."""
+        self.proba_df = self.stay_num_df.copy().T
+        self.proba_df['Probability_1'] = self.proba_df['stay_1']/(self.proba_df['stay_1']+self.proba_df['change_1'])
+        self.proba_df['Probability_2'] = self.proba_df['stay_2']/(self.proba_df['stay_2']+self.proba_df['change_2'])
+        # self.proba_df['Left_feeder(20)'] = self.proba_df['stay_1']/(self.proba_df['stay_1']+self.proba_df['change_1'])
+        # self.proba_df['Right_feeder(80)'] = self.proba_df['stay_2']/(self.proba_df['stay_2']+self.proba_df['change_2'])
+        self.proba_df.drop(['stay_1','change_1','stay_2','change_2'], axis=1, inplace=True)
+  
+
+    def plot_prob(self):
+        ax = self.proba_df.plot.bar()
+        ax.set_title('Right feeder rewards')
+        ax.set_ylabel('Probability')
+
+
+    def run_prob(self,cond):
+        self.stay_prob()
+        self.stay_change_to_df(cond)
+        self.stay_prob_to_df()
+        self.plot_prob()
 
 
     # def mean_pref(self, min = '10Min'): #not finished
@@ -297,12 +374,12 @@ class Data:
 
 if __name__ == "__main__":
 
-    # fname = '2019-11-15.csv'
-    # fname = '2019-12-02_precent.csv'
+    fname = '2020-01-20_A_train_zurik_lamed.csv'
+    # fname = '2019-12-06_F_percent.csv'
     # fname = '2019-12-16_S_X.csv' #not working
     # fname = '2019-12-20_S_dot_line_train.csv'
     # fname = '2019-12-30_lior_kaf_teit_gimel_training7.csv'
-    fname = '2019-12-30_shraga_hagai_training.csv' #problem with bats_stat
+    # fname = '2019-12-30_shraga_hagai_training.csv' #problem with bats_stat
     # f = pd.read_csv(fname)
     # print (f.dtypes)
    
@@ -311,10 +388,11 @@ if __name__ == "__main__":
     # exp = Data(fname)
     # exp.run()
 
-    # exp.time_to_index()
+    exp.time_to_index()
+    exp.pump_score(fill_na=False) 
     # exp.match()
     exp.fill_bat_id_gaps()
-    exp.bats_stat()
+    # exp.bats_stat()
     # exp.basic_stat()
     # print (exp.df_stat)
     # print (exp.df.head())
