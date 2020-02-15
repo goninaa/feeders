@@ -164,12 +164,11 @@ class DATA:
             # if self.bat_id_1 != "no bat" and self.bat_id_1 != None:
             #     self.find_bat()
             # and self.bat_id_2 != "no bat" and self.bat_id_2 != None
-        elif self.activity == False:
+        # elif self.activity == False: # changed (comment out)
         # else:
-            self.bat = 'no_bat'
+            # self.bat = 'no_bat' #changed
         # print (self.activity)
-        # self.save_bat()
-        # self.write_over()
+      
 
 
 if __name__ == "__main__":

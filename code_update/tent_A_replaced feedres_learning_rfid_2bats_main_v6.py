@@ -6,7 +6,10 @@ import csv
 from datetime import date
 from pathlib import Path
 from stereo_one_signal_v2 import *  # playing files import
-from A_class_read_rec_v6 import *
+from A_class_read_rec_v6.2 import * #changed
+
+### need to solve: 1. better way of saving
+###                2. missing reading fron rfid file (reason in unknown)
 
 com_pump = '/dev/ttyUSB0'
 pump = serial.Serial(com_pump, 9600, timeout=1) # pump
@@ -19,7 +22,7 @@ class Feeder:
         self.disconnect = []
         # self.bat = False
         # self.cond = None
-        self.fname = fname
+        self.fname = fname #the rfid file to read from
         self.bat_name = bat_name
         # self.bat_loc = "no_bat"
         self.bat1_id = None
@@ -40,7 +43,7 @@ class Feeder:
             if time.time() >= tr_end:
                 break
             self.read_rfid()
-            time.sleep(0.5)
+            time.sleep(0.5) #short this?
             while self.activity == False:
                 if time.time() >= tr_end:
                     break
@@ -66,7 +69,7 @@ class Feeder:
                     self.read_rfid()
                     # time.sleep(3)
                     # self.decide()
-                    time.sleep(0.5)
+                    time.sleep(0.5) #short this?
                     if self.activity == True and flag_t == 0:
                         self.which_pump(R_p, L_p)
                         flag_t += 1
@@ -129,7 +132,7 @@ class Feeder:
                 print ("no luck!")
 
         except serial.SerialException as e:
-            self.fix_pump_ir
+            self.fix_pump_ir()
 
     # def decide (self):
     #     """check if bat true or false"""
