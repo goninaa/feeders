@@ -167,7 +167,7 @@ class DATA:
         # elif self.activity == False: # changed (comment out)
         # else:
             # self.bat = 'no_bat' #changed
-        # print (self.activity)
+        # print (self.activity) 
       
 
 

@@ -4,9 +4,7 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.dates as md
 import matplotlib.patches as mpatches
-# import plotly.graph_objs as go
-# import plotly.plotly as py
-# import plotly.offline as po
+
 
 class Data:
     def __init__ (self,fname):
@@ -102,7 +100,7 @@ class Data:
             self.df_score.sum_pump.replace(0, np.nan, inplace=True)
         self.df_score.to_csv(f"{self.fname}_score.csv")
 
-    def match (self):
+    def match (self): # need to fix
         """ add a column with y/n if value was as expected or not. later used for plotting"""
         self.df_score = pd.DataFrame(self.df.copy())
         self.df_score['match'] = np.where( 
@@ -117,9 +115,7 @@ class Data:
         self.df_score.to_csv(f"{self.fname}_score.csv")
 
     def stay_prob (self):
-        """ יש לך 4 אפשרויות. כמו באיור. פידר א גמול, א בלי גמול וכו. 
-        נגיד שבחלון היו עשרה מקרים של א עם גמול, 
-        מה הסיכוי שההחלטה היתה להשאר, כלומר לחזור ל-א"""
+        """ """
         # series.resample('3T').sum()
         # shift_df = self.df.copy().shift()
         ## prepare df:
@@ -197,6 +193,12 @@ class Data:
         self.df_filled = self.df.copy()
         self.df_filled['bat1_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
         self.df_filled['bat2_id'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
+        self.df_filled.to_csv(f'{fname}_fill_gaps.csv')
+
+    def fill_bat_loc_gaps (self, gap_limit = 10):
+        """ fills gaps in reading bat_locs, after fill_bat_id_gaps"""
+        self.df_filled['bat1_loc'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
+        self.df_filled['bat2_loc'].fillna (method= 'ffill', limit= gap_limit, inplace= True)
         self.df_filled.to_csv(f'{fname}_fill_gaps.csv')
 
     def find_base(self):
@@ -341,7 +343,45 @@ class Data:
         figtemp.savefig(f'{fname}_{minutes}_mean_plot_{name}.png')
         figtemp.savefig(f'{fname}_{minutes}_mean_plot_{name}.svg')
         plt.show()
-       
+
+    def map_feeders(self):
+        """replace feeder number with its location (left or right)"""
+        self.df_filled['bat2_loc'].fillna(0, inplace= True)
+        map_1 = {101: 'Right',102: 'Left'}
+        # map_2 = {102: 'left'}
+        self.df_filled = self.df_filled.replace({'bat1_loc': map_1, 'bat2_loc': map_1})
+
+    def plot_bat_movement(self, bat_loc='bat2_loc'):
+        # pd.plotting.register_matplotlib_converters(explicit=True)
+        # plt.plot_date( self.df_filled['bat1_loc'])
+        plt.plot(self.df_filled[bat_loc])
+        # plt.show()
+
+    def landings_chunks (self): #in progress
+       """count landing chunks as events on each feeder"""
+       self.time_to_index()
+       self.fill_bat_id_gaps()
+       self.fill_bat_loc_gaps()
+       self.map_feeders()
+    #    self.plot_bat_movement()
+    #    print (self.df_filled['bat1_loc'])
+
+    def start_event (self): #still in progress
+        """ return new df of the feeder first landed in each event start"""
+        df = self.df_filled.copy()
+        # df_no_idx = df.reset_index()
+        # df_conds = pd.concat([df_no_idx['bat2_condition'], df_no_idx['bat2_condition'].shift()], axis=1)
+        # df_conds.columns = ['cond1', 'cond2']
+        # df_conds = df_conds.fillna(method='ffill')
+        # idx = df_conds[df_conds['cond1'] != df_conds['cond2']].index
+        # idx_list = list(idx)
+        # idx_list.remove(0)
+        # idx_list = [x-1 for x in idx_list]
+        # idx_list_max = idx_list + [df.index.shape[0]-1]
+        # idx_list_min = [0] + [x+1 for x in idx_list]
+        # self.df_min = df.iloc[idx_list_min]
+        # df_max = df.iloc[idx_list_max]
+        # self.condition_start_end = list(zip(self.df_min.index, df_max.index))
 
 
 
@@ -390,7 +430,10 @@ if __name__ == "__main__":
     exp = Data(fname)
     # exp.run_fill_na()
     # exp = Data(fname)
-    exp.run()
+    # exp.run()
+    exp.landings_chunks()
+    # print (exp.df_filled[exp.df_filled['bat2_loc']=='Right'])
+    print (exp.df_filled)
     # exp.run_prob('R reward')
 
     # exp.time_to_index()
