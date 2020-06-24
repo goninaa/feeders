@@ -35,28 +35,52 @@ class DATA:
         self.df = self.df.set_index(['TIME'])
         self.df.pop('time')
 
+    # def check_activity (self):
+    #     """ determine if there been an activity in the last second (only in antennas 101 and 102)"""
+    #     ten_sec_ago = (datetime.datetime.now()- datetime.timedelta(seconds=10)) ##changed
+    #     th_seconds = 1 ##changed
+    #     second_ago = (datetime.datetime.now()- datetime.timedelta(seconds=th_seconds))
+    #     self.df = self.df.last('1s')
+    #     row_time = self.df.index.unique()
+    #     # print (row_time[0])
+    #     # if row_time[0] >= second_ago:
+    #     if row_time[0] >= second_ago and ((101 in self.df.last('1s')['ANTENNA'].unique())or(102 in self.df.last('1s')['ANTENNA'].unique()) ): 
+    #         self.activity = True
+    #         # print ('bat')
+    #     # elif row_time[0] >= ten_sec_ago and row_time[0] < second_ago: ##changed
+    #     elif (row_time[0] >= ten_sec_ago 
+    #         and ((101 in self.df.last('10s')['ANTENNA'].unique())
+    #         or (102 in self.df.last('10s')['ANTENNA'].unique()))
+    #         and row_time[0] < second_ago): 
+    #         self.activity = "bat in last 10" ##changed
+    #         # print ("bat in last 10")
+    #     else:
+    #         self.activity = False  #false only if was no bat for 10 sec
+    #         # print ('no bat')
+
     def check_activity (self):
         """ determine if there been an activity in the last second (only in antennas 101 and 102)"""
         ten_sec_ago = (datetime.datetime.now()- datetime.timedelta(seconds=10)) ##changed
-        th_seconds = 1 ##changed
+        th_seconds = 2 ##changed (can try to change it to 2 sec)
         second_ago = (datetime.datetime.now()- datetime.timedelta(seconds=th_seconds))
-        self.df = self.df.last('1s')
+        self.df = self.df.last('2s') #(can try to change it to 2 sec)
         row_time = self.df.index.unique()
         # print (row_time[0])
         # if row_time[0] >= second_ago:
-        if row_time[0] >= second_ago and ((101 in self.df.last('1s')['ANTENNA'].unique())or(102 in self.df.last('1s')['ANTENNA'].unique()) ): 
+        if row_time[0] >= second_ago and ((101 in self.df['ANTENNA'].unique())or(102 in self.df['ANTENNA'].unique()) ): 
             self.activity = True
             # print ('bat')
         # elif row_time[0] >= ten_sec_ago and row_time[0] < second_ago: ##changed
         elif (row_time[0] >= ten_sec_ago 
-            and ((101 in self.df.last('10s')['ANTENNA'].unique())
-            or (102 in self.df.last('10s')['ANTENNA'].unique()))
+            and ((101 in self.df['ANTENNA'].unique())
+            or (102 in self.df['ANTENNA'].unique()))
             and row_time[0] < second_ago): 
             self.activity = "bat in last 10" ##changed
             # print ("bat in last 10")
         else:
             self.activity = False  #false only if was no bat for 10 sec
             # print ('no bat')
+
             
     def find_bat(self):
         """ find next to which antenna the bat is (not in use anymore)"""
@@ -164,9 +188,8 @@ class DATA:
             # if self.bat_id_1 != "no bat" and self.bat_id_1 != None:
             #     self.find_bat()
             # and self.bat_id_2 != "no bat" and self.bat_id_2 != None
-        # elif self.activity == False: # changed (comment out)
-        # else:
-            # self.bat = 'no_bat' #changed
+        elif self.activity == False: 
+            self.bat = 'no_bat' #changed # not necessary
         # print (self.activity) 
       
 

@@ -8,8 +8,8 @@ from pathlib import Path
 from stereo_one_signal_v2 import *  # playing files import
 from A_class_read_rec_v6.2 import * #changed
 
-### need to solve: 1. better way of saving
-###                2. missing reading fron rfid file (reason in unknown)
+### need to solve: 1. better way of saving- updated
+###                2. missing reading fron rfid file (reason in unknown)- can try to change it to 2 sec in check activity (class read)
 
 com_pump = '/dev/ttyUSB0'
 pump = serial.Serial(com_pump, 9600, timeout=1) # pump
@@ -56,6 +56,7 @@ class Feeder:
                 self.df.loc[pd.Timestamp.now().strftime('%d-%m-%Y-%H:%M:%S'),'bat2_condition'] = self.cond
                 ###need to save safely somehow
                 # self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d')}_{self.bat_name}.csv")
+                # self.df.to_csv(fr'tent_A\{pd.Timestamp.now().strftime('%Y-%m-%d-%H')}_{self.bat_name}.csv')
                 self.df.to_csv(f"{pd.Timestamp.now().strftime('%Y-%m-%d-%H')}_{self.bat_name}.csv") #saves different file every hour
                 
                 # print (df)
@@ -193,6 +194,7 @@ class Feeder:
             self.pump_it(2)
             time.sleep(2)
 
+
     def run_slow (self, intervals = 20, running_time= 3600, cond1_R_p=(0.8,0.2), cond1_L_p=(0.2,0.8), cond2_R_p=(0.2,0.8), cond2_L_p=(0.8,0.2)):
         """main- alternate between conditions every x time"""
         # self.signal_on_reward(rewarding_feeder = 'R', intervals = intervals, running_time = running_time, R_p=cond2_R_p, L_p=cond2_L_p) #cond2
@@ -225,8 +227,16 @@ if __name__ == "__main__":
     cond2_L_p=(0.8,0.2) # left win-lose p in cond2 (RIGHT)
 
     # clean
-    feeder.cond = 'clean_tent_A'
-    feeder.clean(30)
+    # feeder.cond = 'clean_tent_A'
+    # feeder.clean(30)
+
+    # test for pumps: 
+    while True:
+        feeder.cond = 'pump_test_A'
+        feeder.clean(1)
+        time.sleep (1800)
+   
+
     
         
     # feeder.cond = 'R'

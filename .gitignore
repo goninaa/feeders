@@ -134,3 +134,140 @@ code_update/__pycache__/saving_test.cpython-37-pytest-5.2.1.pyc
 code_update/.pytest_cache/v/cache/stepwise
 code_update/.pytest_cache/v/cache/nodeids
 
+feeders analysis/new analysis_LR/all_events_marked.csv
+feeders analysis/2020-04-24-09_B_Slash_fast.csv_score.csv
+feeders analysis/2020-04-24-09_B_Slash_fast.csv_fill_gaps.csv
+feeders analysis/2020-04-24-09_B_Slash_fast.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-24-09_B_Slash_fast.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-04-24-09_B_Slash_fast.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-24-09_B_Slash_fast.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-04-24-09_B_Slash_fast.csv
+feeders analysis/2020-04-03-09_A_test_Eight_Tzadi.csv_score.csv
+feeders analysis/2020-04-03-09_A_test_Eight_Tzadi.csv_fill_gaps.csv
+feeders analysis/2020-04-03-09_A_test_Eight_Tzadi.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-03-09_A_test_Eight_Tzadi.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-04-03-09_A_test_Eight_Tzadi.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-03-09_A_test_Eight_Tzadi.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-04-03-09_A_test_Eight_Tzadi.csv
+feeders analysis/2020-04-02-09_B_Eight_slow.csv
+feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv_score.csv
+feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv_fill_gaps.csv
+feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv
+feeders analysis/2020-04-02-07_A_Tzadi_slow.csv_score.csv
+feeders analysis/2020-04-02-07_A_Tzadi_slow.csv_fill_gaps.csv
+feeders analysis/2020-04-02-07_A_Tzadi_slow.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-02-07_A_Tzadi_slow.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-04-02-07_A_Tzadi_slow.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-02-07_A_Tzadi_slow.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-26-03_B_Lamed_slow.csv
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_score.csv
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_movement_plot.svg
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_movement_plot.png
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_fill_gaps.csv
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_choices_plot_choices_only.svg
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_choices_plot_choices_only.png
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_all choices.svg
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_all choices.png
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-24-05_B_Lamed_slow.csv
+feeders analysis/2020-03-23-06_A_Aein_fast.csv
+feeders analysis/2020-03-23-03_A_Aein_fast.csv
+feeders analysis/2020-03-19-08_B_Shin_slow.csv_score.csv
+feeders analysis/2020-03-19-08_B_Shin_slow.csv_fill_gaps.csv
+feeders analysis/2020-03-19-08_B_Shin_slow.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-19-08_B_Shin_slow.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-19-08_B_Shin_slow.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-19-08_B_Shin_slow.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-19-08_B_Shin_slow.csv
+feeders analysis/2020-03-19-08_A_Yossi_slow.csv_score.csv
+feeders analysis/2020-03-19-08_A_Yossi_slow.csv_fill_gaps.csv
+feeders analysis/2020-03-19-08_A_Yossi_slow.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-19-08_A_Yossi_slow.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-19-08_A_Yossi_slow.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-19-08_A_Yossi_slow.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-19-08_A_Yossi_slow.csv
+feeders analysis/2020-03-17-06_B_Shin_slow.csv
+feeders analysis/2020-03-17-04_A_Yossi_slow.csv
+feeders analysis/2020-03-12-09_A_Gimel_fast.csv_score.csv
+feeders analysis/2020-03-12-09_A_Gimel_fast.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-12-09_A_Gimel_fast.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-12-09_A_Gimel_fast.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-12-09_A_Gimel_fast.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-12-09_A_Gimel_fast.csv
+feeders analysis/2020-03-10-09_A_Gimel_fast.csv_score.csv
+feeders analysis/2020-03-10-09_A_Gimel_fast.csv_fill_gaps.csv
+feeders analysis/2020-03-10-09_A_Gimel_fast.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-10-09_A_Gimel_fast.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-10-09_A_Gimel_fast.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-10-09_A_Gimel_fast.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-09-08_A_Gimel_fast.csv_score.csv
+feeders analysis/2020-03-09-08_A_Gimel_fast.csv_fill_gaps.csv
+feeders analysis/2020-03-09-08_A_Gimel_fast.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-09-08_A_Gimel_fast.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-09-08_A_Gimel_fast.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-09-08_A_Gimel_fast.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-09-08_A_Gimel_fast.csv
+feeders analysis/2020-03-05-07_A_Tet_slow.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-05-07_A_Tet_slow.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-05-07_A_Tet_slow.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-05-07_A_Tet_slow.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-03-03-09_A_Tet_slow.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-03-09_A_Tet_slow.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-03-03-09_A_Tet_slow.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-03-03-09_A_Tet_slow.csv_10Min_mean_plot_choices_only.png
+feeders analysis/.DS_Store
+feeders analysis/.2020-03-10-09_A_Gimel_fast.csv.icloud
+feeders analysis/.2020-03-10-09_A_Gimel_fast.csv_score.csv.icloud
+feeders analysis/.2020-03-09-08_A_Gimel_fast.csv_score.csv.icloud
+feeders analysis/.2020-03-05-07_A_Tet_slow.csv.icloud
+feeders analysis/.2020-03-05-07_A_Tet_slow.csv_score.csv.icloud
+feeders analysis/.2020-03-03-09_A_Tet_slow.csv.icloud
+feeders analysis/.2020-03-03-09_A_Tet_slow.csv_score.csv.icloud
+feeders analysis/.2020-02-24-09_A_kaf.csv.icloud
+feeders analysis/.2020-02-24-09_A_kaf.csv_score.csv.icloud
+feeders analysis/.2020-02-24-09_A_kaf.csv_fill_gaps.csv.icloud
+code_update/__pycache__/save_df_test.cpython-37-pytest-5.2.1.pyc
+feeders analysis/new analysis_LR/stay_prob_ev1.csv
+code_update/2020-02-16-19_self.bat_name.csv
+feeders analysis/1_4nights.csv
+feeders analysis/2020-03-18-06_B_Shin_slow.csv
+feeders analysis/2020-03-20-07_B_Shin_slow.csv
+feeders analysis/2020-03-30-06_A_Tzadi_slow.csv
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv_10Min_mean_plot_Mean choices.png
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv_10Min_mean_plot_Mean choices.svg
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv_fill_gaps.csv
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv_movement_plot.png
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv_movement_plot.svg
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv_stay_prob.png
+feeders analysis/2020-03-31-07_A_Tzadi_slow.csv_stay_prob.svg
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv_10Min_mean_plot_Mean choices.png
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv_10Min_mean_plot_Mean choices.svg
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv_fill_gaps.csv
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv_movement_plot.png
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv_movement_plot.svg
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv_stay_prob.png
+feeders analysis/2020-04-01-05_A_Tzadi_slow.csv_stay_prob.svg
+feeders analysis/2020-04-02-06_A_Tzadi_slow.csv
+feeders analysis/2020-04-02-06_A_Tzadi_slow.csv_fill_gaps.csv
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_10Min_mean_plot_choices_only.png
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_10Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_60Min_mean_plot_choices_only.png
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_60Min_mean_plot_choices_only.svg
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_choices_plot_choices_only.png
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_choices_plot_choices_only.svg
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_fill_gaps.csv
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_movement_plot.png
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_movement_plot.svg
+feeders analysis/2020-04-24-08_A_Arrow_slow.csv_score.csv
+feeders analysis/all_bats_24-06-2020.csv
+feeders analysis/new analysis_LR/stay_prob_df.csv

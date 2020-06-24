@@ -6,6 +6,8 @@ import matplotlib.dates as md
 import matplotlib.patches as mpatches
 
 
+
+
 class Data:
     def __init__ (self,fname):
         self.fname = fname    
@@ -250,10 +252,7 @@ class Data:
         L.get_texts()[0].set_text('80% reward')
         L.get_texts()[1].set_text('20% reward')
         ax.set_ylabel('Stay probability')
-        for label in ax.get_xticklabels():
-            label.set_rotation(0)
         fig = ax.get_figure()
-        fig.tight_layout()
         fig.savefig(f'{fname}_stay_prob.png')
         fig.savefig(f'{fname}_stay_prob.svg')
      
@@ -442,23 +441,9 @@ class Data:
         figtemp.savefig(f'{fname}_choices_plot_{name}.svg')
 
 
-    def plot_pref (self, minutes = '10Min', name= 'choices_only', events = False): #changed
+    def plot_pref (self, minutes = '10Min', name= 'choices_only'): 
         """ """
-        if events == False: 
-            df_mean_pref = self.df_score.resample(minutes, base = self.base, label='right').mean()
-        elif events == True:
-            df_mean_pref = self.stay_prob_ev.copy()
-            df_mean_pref['sum_pump']= df_mean_pref['choice']
-            mapping1 = {1: -1}
-            mapping2 = {2: 1}
-            df_mean_pref = df_mean_pref.astype({'sum_pump': 'object'})
-            df_mean_pref.replace({'sum_pump': mapping1}, inplace= True)
-            df_mean_pref.replace({'sum_pump': mapping2}, inplace= True)
-            df_mean_pref.sum_pump.fillna(0, inplace= True)
-            df_mean_pref = df_mean_pref.resample(minutes, base = self.base, label='right').mean()
-            print (df_mean_pref['sum_pump'])
-            # df_mean_pref = df_mean_pref.astype({'choice': 'int'})  
-           
+        df_mean_pref = self.df_score.resample(minutes, base = self.base, label='right').mean()
    
         pd.plotting.register_matplotlib_converters(explicit=True)
 
@@ -547,6 +532,7 @@ class Data:
         except NameError as e:
             print (e, 'bat can be 1 or 2')
 
+
     def run_landings_chunks (self,bat, cond):
         """count landing chunks as events on each feeder"""
         self.time_to_index()
@@ -557,10 +543,8 @@ class Data:
         self.map_feeders()
         self.start_event(bat)
         self.mark_reward(bat)
-        self.cond_times()
         self.plot_bat_movement(bat=bat)
         self.run_prob_ev(cond=cond,bat=bat)
-        self.plot_pref(minutes='10Min',name='Mean choices', events=True)
         # self.run_prob_ev(cond='R reward')
     #    print (self.df_filled['bat1_loc'])
 
@@ -594,7 +578,7 @@ class Data:
 
     def mark_reward (self,bat): #not working yet
         """ mark all often and rare rewards, bat can be 1 or 2
-            input: self.df_min_ev, output: self.df_min_ev('all_events_marked.csv')"""
+            input: self.df_min_ev, output: self.df_min_ev"""
         # self.df_min_ev['mark'] = np.where( 
         #                         ( (self.df_min_ev['pump_1'] == '1') & (self.df_min_ev['bat2_condition'] == 'R reward' ) )
         #                         | ( (self.df_min_ev['pump_2'] == '2') & (self.df_min_ev['bat2_condition'] == 'L reward' ) )
@@ -613,7 +597,14 @@ class Data:
         except NameError as e:
             print (e, 'bat can be 1 or 2')
         self.df_min_ev.to_csv('all_events_marked.csv')
-        
+
+    def find_tag(self):
+        """find if bat1 or bat2 by the tag"""
+        pass
+
+    def find_first_cond:
+        """find if starts with R reward or L reawrd """     
+        pass   
         
 
 
@@ -656,7 +647,7 @@ if __name__ == "__main__":
     # fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv'
     # fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-03-24-05_B_Lamed_slow.csv'
     # fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-04-24-08_A_Arrow_slow.csv'
-    fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-04-02-06_A_Tzadi_slow.csv'
+    fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-03-20-07_B_Shin_slow.csv'
     # fname = '2020-01-20_A_train_zurik_lamed.csv'
     # fname = '2019-12-06_F_percent.csv'
     # fname = '2019-12-16_S_X.csv' #not working
@@ -670,9 +661,9 @@ if __name__ == "__main__":
     # exp.run_fill_na()
     # exp = Data(fname)
 
-    # exp.run(bat=1) # works (choices only)
+    exp.run(bat=1) # works (choices only)
     # exp.run_prob('L reward') #works (choices only)
-    exp.run_landings_chunks(bat=1, cond= 'R reward') #works
+    # exp.run_landings_chunks(bat=1, cond= 'L reward') #works
 
     # print (exp.df_min_ev['bat2_loc'].head(10))
     # print (exp.df_min_ev.head(10))

@@ -4,6 +4,59 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.dates as md
 import matplotlib.patches as mpatches
+import attr
+from attr.validators import instance_of
+from pathlib import Path
+from typing import Union
+
+
+@attr.s
+class ProcessFilelist:
+    """Pipeline to process a list of files.
+    Reads attributes from filename and creates a list of EyeFile objects to pass.
+    Attributes: filelist, invalid_files, eyedict.
+    Methods: instantiate_eye_file, assert_csv, extract_file_attrs.
+    """
+    filelist = attr.ib(validator=instance_of(list))
+    invalid_files = attr.ib(default=attr.Factory(list)) ### should add invalid files output ###
+    eyedict = attr.ib(default=attr.Factory(dict)) # nested dict of EyeFile instances to pass forward
+
+    def get_file_attrs(self) -> None:
+        """Analizes file attributes and instantiate BatFile objects"""
+        for batfile in self.filelist:
+            path = Path(batfile)
+            fname = path.name
+            if not self.assert_csv(path): # accepts only .csv files
+                self.invalid_files.append(fname)
+                continue
+
+            # fattrs = self.extract_file_attrs(fname)
+            # if not fattrs: # accepts files only if named in the appropriate pattern
+            #     self.invalid_files.append(fname)
+            #     continue
+            # date, tent, bat_name, data_type = fattrs[0], fattrs[1], fattrs[2], fattrs[9]
+
+    def assert_csv(self, path: Path) -> bool:
+        """Asserts that a file is a csv file"""
+        return str.lower(path.suffix) == '.csv'
+
+    def extract_file_attrs(self, fname: str) -> Union[list, bool]:
+        """If the file named appropriately, extracts its attributes from filename"""
+        fattrs = fname.split('_')
+        # return fattrs if len(fattrs) == 10 else False
+
+
+@attr.s(frozen=True)
+class BatFile:
+    """File object path attribute and several metadata attributes.
+    Instantiated by the ProcessFilelist class, passed to the ProcessData class
+    Attributes: path, fname, experiment."""
+    path = attr.ib(validator=instance_of(Path))
+    fname = attr.ib(validator=instance_of(str))
+    experiment = attr.ib(validator=instance_of(str))
+    bat_name = attr.ib(validator=instance_of(str))
+    # bat_num (1 or 2?)
+    # cond (right or left)
 
 
 class Data:
@@ -250,10 +303,7 @@ class Data:
         L.get_texts()[0].set_text('80% reward')
         L.get_texts()[1].set_text('20% reward')
         ax.set_ylabel('Stay probability')
-        for label in ax.get_xticklabels():
-            label.set_rotation(0)
         fig = ax.get_figure()
-        fig.tight_layout()
         fig.savefig(f'{fname}_stay_prob.png')
         fig.savefig(f'{fname}_stay_prob.svg')
      
@@ -442,23 +492,9 @@ class Data:
         figtemp.savefig(f'{fname}_choices_plot_{name}.svg')
 
 
-    def plot_pref (self, minutes = '10Min', name= 'choices_only', events = False): #changed
+    def plot_pref (self, minutes = '10Min', name= 'choices_only'): 
         """ """
-        if events == False: 
-            df_mean_pref = self.df_score.resample(minutes, base = self.base, label='right').mean()
-        elif events == True:
-            df_mean_pref = self.stay_prob_ev.copy()
-            df_mean_pref['sum_pump']= df_mean_pref['choice']
-            mapping1 = {1: -1}
-            mapping2 = {2: 1}
-            df_mean_pref = df_mean_pref.astype({'sum_pump': 'object'})
-            df_mean_pref.replace({'sum_pump': mapping1}, inplace= True)
-            df_mean_pref.replace({'sum_pump': mapping2}, inplace= True)
-            df_mean_pref.sum_pump.fillna(0, inplace= True)
-            df_mean_pref = df_mean_pref.resample(minutes, base = self.base, label='right').mean()
-            print (df_mean_pref['sum_pump'])
-            # df_mean_pref = df_mean_pref.astype({'choice': 'int'})  
-           
+        df_mean_pref = self.df_score.resample(minutes, base = self.base, label='right').mean()
    
         pd.plotting.register_matplotlib_converters(explicit=True)
 
@@ -547,6 +583,7 @@ class Data:
         except NameError as e:
             print (e, 'bat can be 1 or 2')
 
+
     def run_landings_chunks (self,bat, cond):
         """count landing chunks as events on each feeder"""
         self.time_to_index()
@@ -557,10 +594,8 @@ class Data:
         self.map_feeders()
         self.start_event(bat)
         self.mark_reward(bat)
-        self.cond_times()
         self.plot_bat_movement(bat=bat)
         self.run_prob_ev(cond=cond,bat=bat)
-        self.plot_pref(minutes='10Min',name='Mean choices', events=True)
         # self.run_prob_ev(cond='R reward')
     #    print (self.df_filled['bat1_loc'])
 
@@ -594,7 +629,7 @@ class Data:
 
     def mark_reward (self,bat): #not working yet
         """ mark all often and rare rewards, bat can be 1 or 2
-            input: self.df_min_ev, output: self.df_min_ev('all_events_marked.csv')"""
+            input: self.df_min_ev, output: self.df_min_ev"""
         # self.df_min_ev['mark'] = np.where( 
         #                         ( (self.df_min_ev['pump_1'] == '1') & (self.df_min_ev['bat2_condition'] == 'R reward' ) )
         #                         | ( (self.df_min_ev['pump_2'] == '2') & (self.df_min_ev['bat2_condition'] == 'L reward' ) )
@@ -656,7 +691,7 @@ if __name__ == "__main__":
     # fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-04-02-09_B_Eight_slow_cut_midnight.csv'
     # fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-03-24-05_B_Lamed_slow.csv'
     # fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-04-24-08_A_Arrow_slow.csv'
-    fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-04-02-06_A_Tzadi_slow.csv'
+    fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-03-20-07_B_Shin_slow.csv'
     # fname = '2020-01-20_A_train_zurik_lamed.csv'
     # fname = '2019-12-06_F_percent.csv'
     # fname = '2019-12-16_S_X.csv' #not working
@@ -670,9 +705,9 @@ if __name__ == "__main__":
     # exp.run_fill_na()
     # exp = Data(fname)
 
-    # exp.run(bat=1) # works (choices only)
+    exp.run(bat=1) # works (choices only)
     # exp.run_prob('L reward') #works (choices only)
-    exp.run_landings_chunks(bat=1, cond= 'R reward') #works
+    # exp.run_landings_chunks(bat=1, cond= 'L reward') #works
 
     # print (exp.df_min_ev['bat2_loc'].head(10))
     # print (exp.df_min_ev.head(10))
