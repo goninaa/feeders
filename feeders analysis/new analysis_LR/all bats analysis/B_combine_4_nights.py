@@ -4,6 +4,7 @@ import attr
 from attr.validators import instance_of
 import datetime
 import time
+import os
 
 class AllNights:
     def __init__ (self,nights_list,subj,env):
@@ -49,7 +50,13 @@ class AllNights:
         self.df_nights['env'] = self.env
         self.df_nights = self.df_nights[['subj','env','night','trial','epoch','time0','time1','ch','rw','corr_side']]
         self.df_nights.rename(columns={'time1':'time'},inplace=True)
-        self.df_nights.to_csv(f"{self.subj}_4nights.csv")
+        self.save_csv()
+
+    def save_csv (self):
+        root = f'/Users/gonina/Dropbox/feeders_exp/analysis/4nights_files'
+        if not os.path.exists(root):
+            os.makedirs(root)
+        self.df_nights.to_csv(f"{root}/subj_{self.subj}_4nights.csv")
         
     
     def night_num (self):

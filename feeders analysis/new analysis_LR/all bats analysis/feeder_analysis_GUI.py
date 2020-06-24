@@ -33,7 +33,7 @@ class csv_GUI:
             self.filelist = self.values[0].split(';')
         elif self.values[1]:
             self.folder = Path(self.values[1])
-            self.filelist = [file for file in self.folder.glob('*.csv')]
+            self.filelist = [file for file in self.folder.glob('**/*.csv')]
         else:
             raise Exception('Folder/files not found')
 
@@ -50,5 +50,5 @@ class csv_GUI:
 if __name__ == "__main__":
     user_input=csv_GUI()
     assert user_input.run()
-    # print (user_input.filelist)
+    print (user_input.filelist)
     print (user_input.folder)

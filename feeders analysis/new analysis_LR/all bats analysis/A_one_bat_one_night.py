@@ -30,6 +30,7 @@ class OneNight:
         self.df_min_ev = None
         self.subj = subj
         self.date = None
+        self.env = None
 
     def find_date(self):
         self.date= self.df['Unnamed: 0'][0].split('-')
@@ -102,6 +103,17 @@ class OneNight:
             # self.df_events = df
         except NameError as e:
             print (e, 'bat can be 1 or 2')
+        
+    def find_env (self):
+        env = self.fname.split('_')[-1]
+        env = env.split('.')[0]
+       
+        if env == 'slow':
+            self.env=1
+        elif env == 'fast':
+            self.env=2
+        else:
+            raise ValueError ('env is nither slow or fast')
 
     def mark_reward (self,bat): #not working yet
         """ mark all often and rare rewards, bat can be 1 or 2
@@ -120,13 +132,16 @@ class OneNight:
         except NameError as e:
             print (e, 'bat can be 1 or 2')
         root = f'subj_{self.subj}_bat'
-        os.makedirs(root)
-        self.df_min_ev.to_csv(f'{root}/{self.date}_all_events_marked.csv')
+        if not os.path.exists(root):
+            os.makedirs(root)
+        self.df_min_ev.to_csv(f'{root}/{self.date}_{self.env}_all_events_marked.csv')
 
 
     def run_landings_chunks (self,bat):
         """count landing chunks as events on each feeder"""
         self.find_date()
+        self.find_env()
+        print (self.env)
         self.time_to_index()
         self.fill_bat_id_gaps()
         self.fill_bat_loc_gaps()
@@ -138,6 +153,7 @@ class OneNight:
 
 if __name__ == "__main__":
     
-    fname = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/2020-04-02-06_A_Tzadi_slow.csv'
+    path = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/new analysis_LR/all bats analysis/one_bat_to_analyze'
+    fname = f'{path}/2020-03-17-08_B_Shin_slow.csv' 
     exp = OneNight(fname=fname, subj=1)
     exp.run_landings_chunks(bat=1)

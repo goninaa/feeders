@@ -1,10 +1,12 @@
-from bat_GUI import *
-from bat_process_GUI_input import *
+from feeder_analysis_GUI import *
+from process_feeder_gui import *
+from B_combine_4_nights import *
+from C_merge_all_bats import *
 # from read_mass_data import *
 
 
 @attr.s
-class BatData:
+class BatsData:
     """Mass data base builder tool.
     Attributes: user_input, massdict, df_list, b_data.
     Methods:
@@ -14,20 +16,17 @@ class BatData:
     method big_data() creates one big pd.DataFrame from all data frames of a given experiment.
     method run() is the main function for this process.
     """
-    
-    user_input = attr.ib(default=bat_GUI)
-    batitem = attr.ib(default=BatFile)
-    # massdict = attr.ib(default=attr.Factory(dict))
-    # df_list = attr.ib(default=attr.Factory(list))
-    # invalid_files = attr.ib(default=attr.Factory(list)) #new
-    # missing_data = attr.ib(default=attr.Factory(list)) #new
-
+    user_input = attr.ib(default=csv_GUI)
+    batdict = attr.ib(default=attr.Factory(dict))
+    df_list = attr.ib(default=attr.Factory(list))
+    invalid_files = attr.ib(default=attr.Factory(list)) #new
+    missing_data = attr.ib(default=attr.Factory(list)) #new
     # b_data = attr.ib(default=AllId)
     
         
     def input(self) -> bool:
         """prompts for user input"""
-        user_input = bat_GUI()
+        user_input = csv_GUI()
         assert_input = user_input.run()
         if not assert_input:
             return False
@@ -36,35 +35,30 @@ class BatData:
     
     def raw_data(self) -> None:
         """creates raw data objects for each file"""
-        filelist = ProcessFile(self.user_input.filelist)
+        filelist = ProcessFilelist(self.user_input.filelist)
         filelist.get_file_attrs()
-        self.batitem = filelist.batitem
-        # self.invalid_files = filelist.invalid_files #new
+        self.batdict = filelist.batdict
+        self.invalid_files = filelist.invalid_files 
 
 
     def data(self) -> None:
-        """creates data frame list"""
+        """creates a 4nights df for each bat in batdict and add it to the df_list"""
         
-        for key, value in self.massdict.items():
+        for key, value in self.batdict.items():
             try:
-                val1, val2 = value.values()
+                val1, val2, val3, val4 = value.values()
             except ValueError:
                 self.missing_data.append(key)
                 continue
-            if val1.pos_neg == 'neg' and val2.pos_neg == 'pos':
-                neg_f = val1
-                pos_f = val2
-            elif val1.pos_neg == 'pos' and val2.pos_neg == 'neg':
-                neg_f = val2
-                pos_f = val1
-            data = SampleData(pos=pos_f, neg=neg_f)
+            data = AllNights(nights_list=[val1.path, val2.path,val3.path,val4.path],subj=val1.subj,env=val1.env)
             data.run()
-            self.df_list.append(data.df)
+            self.df_list.append(data.df_nights)
+            print (data.df_nights)
 
     
     def big_data(self) -> None:
-        """creates one big data frame from all data frames in the list"""
-        b_data = AllId (self.df_list)
+        """creates one big data frame from all data frames in the df_list"""
+        b_data = AllBats (self.df_list)
         b_data.run()
         self.b_data = b_data
 
@@ -89,14 +83,14 @@ class BatData:
         print('Collecting files...')
         self.raw_data()
         print('Reading files...')
-        # self.data()
-        # print('Building dataframe...')
-        # self.big_data()
-        # print('Analyzing...')
-        # self.invalid_files_list()
-        # self.missing_data_list()
+        self.data()
+        print('Building dataframe...')
+        self.big_data()
+        print('Analyzing...')
+        self.invalid_files_list()
+        self.missing_data_list()
         print('Done.')
-        return True
+        # return True
 
 if __name__ == "__main__":
-    BatData().run()
+    BatsData().run()
