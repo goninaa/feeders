@@ -154,6 +154,6 @@ class OneNight:
 if __name__ == "__main__":
     
     path = '/Users/gonina/Dropbox/feeders_exp/analysis/one_bat_to_analyze'
-    fname = f'{path}/Yossi/2020-03-20-08_A_Yossi_slow.csv' 
-    exp = OneNight(fname=fname, subj=2)
-    exp.run_landings_chunks(bat=2)
+    fname = f'{path}/1Shraga/2020-03-18-08_B_Shin_slow.csv' 
+    exp = OneNight(fname=fname, subj=1)
+    exp.run_landings_chunks(bat=1)

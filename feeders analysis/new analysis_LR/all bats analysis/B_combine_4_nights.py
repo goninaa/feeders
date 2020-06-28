@@ -41,10 +41,10 @@ class AllNights:
         reward = {'reward':1, 'no reward':0}
         corr_side = {'R reward':1, 'L reward':2} #notice this oppsite to what nitzan did
         # print (self.df_nights.loc[self.df_nights.columns.str.endswith('_loc')])#need to fix
-        if self.df_nights['bat1_loc'][0]=='Right' or self.df_nights['bat1_loc'][0]=='Left':
+        if self.df_nights['bat2_loc'].isnull().values.any(): #if there is nan in the column than it's bat 1
             self.df_nights.rename(columns={'bat1_loc':'ch', 'output':'rw', 'bat2_condition':'corr_side'}, inplace=True) #need to fix bat loc?
-        elif self.df_nights['bat2_loc'][0]=='Right' or self.df_nights['bat2_loc'][0]=='Left':
-            self.df_nights.rename(columns={'bat1_loc':'ch', 'bat2_loc':'ch', 'output':'rw', 'bat2_condition':'corr_side'}, inplace=True)
+        elif self.df_nights['bat1_loc'].isnull().values.any():
+            self.df_nights.rename(columns={'bat2_loc':'ch', 'output':'rw', 'bat2_condition':'corr_side'}, inplace=True)
         self.df_nights.replace({'ch': choice, 'rw':reward, 'corr_side':corr_side}, inplace=True)
         self.df_nights['subj'] = self.subj
         self.df_nights['env'] = self.env
