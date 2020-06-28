@@ -131,7 +131,7 @@ class OneNight:
                                     , 'reward', 'no reward')
         except NameError as e:
             print (e, 'bat can be 1 or 2')
-        root = f'subj_{self.subj}_bat'
+        root = f'/Users/gonina/Dropbox/feeders_exp/analysis/bats_events_to_analyze/subj_{self.subj}_bat'
         if not os.path.exists(root):
             os.makedirs(root)
         self.df_min_ev.to_csv(f'{root}/{self.date}_{self.env}_all_events_marked.csv')
@@ -153,7 +153,7 @@ class OneNight:
 
 if __name__ == "__main__":
     
-    path = '/Users/gonina/Library/Mobile Documents/com~apple~CloudDocs/lab/python_codes/feeders/feeders analysis/new analysis_LR/all bats analysis/one_bat_to_analyze'
-    fname = f'{path}/2020-03-17-08_B_Shin_slow.csv' 
-    exp = OneNight(fname=fname, subj=1)
-    exp.run_landings_chunks(bat=1)
+    path = '/Users/gonina/Dropbox/feeders_exp/analysis/one_bat_to_analyze'
+    fname = f'{path}/Yossi/2020-03-20-08_A_Yossi_slow.csv' 
+    exp = OneNight(fname=fname, subj=2)
+    exp.run_landings_chunks(bat=2)

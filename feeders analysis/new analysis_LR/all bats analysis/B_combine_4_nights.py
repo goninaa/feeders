@@ -48,8 +48,9 @@ class AllNights:
         self.df_nights.replace({'ch': choice, 'rw':reward, 'corr_side':corr_side}, inplace=True)
         self.df_nights['subj'] = self.subj
         self.df_nights['env'] = self.env
-        self.df_nights = self.df_nights[['subj','env','night','trial','epoch','time0','time1','ch','rw','corr_side']]
-        self.df_nights.rename(columns={'time1':'time'},inplace=True)
+        # self.df_nights = self.df_nights[['subj','env','night','trial','epoch','time0','time1','ch','rw','corr_side']]
+        self.df_nights = self.df_nights[['subj','env','night','trial','time','time0','time1','ch','rw','corr_side']]
+        # self.df_nights.rename(columns={'time1':'time'},inplace=True)
         self.save_csv()
 
     def save_csv (self):
@@ -78,9 +79,11 @@ class AllNights:
         """ calculate the time from the start of each night """
         for df in self.df_list:
             df['time'] = pd.to_datetime(df['time'],dayfirst= True)
-            df['epoch'] = df['time'].astype('int64')
-            df['time0'] = df['epoch'][0]
-            df['time1'] = pd.to_timedelta(df['epoch']-df['time0'])
+            # df['epoch'] = df['time'].astype('int64')
+            # df['time0'] = df['epoch'][0]
+            # df['time1'] = pd.to_timedelta(df['epoch']-df['time0'])
+            df['time0'] = df['time'][0]
+            df['time1'] = pd.to_timedelta(df['time']-df['time0'])
        
        
 
